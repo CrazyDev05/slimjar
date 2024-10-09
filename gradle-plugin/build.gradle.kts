@@ -5,9 +5,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `maven-publish`
     `java-gradle-plugin`
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.gradle.publish)
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("jvm") version "1.9.0"
 }
 
 repositories {
@@ -20,16 +19,16 @@ configurations["testImplementation"].extendsFrom(shadowImplementation)
 
 dependencies {
 
-    shadowImplementation(libs.kotlin.stdlib)
+    shadowImplementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
     shadowImplementation(project(":slimjar"))
     shadowImplementation("com.google.code.gson:gson:2.10")
-    shadowImplementation(libs.kotlinx.coroutines)
+    shadowImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0")
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
-    compileOnly(libs.gradle.shadow)
+    compileOnly("com.github.johnrengelman:shadow:8.1.1")
 
-    testImplementation(libs.gradle.shadow)
+    testImplementation("com.github.johnrengelman:shadow:8.1.1")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleApi())
     testImplementation(gradleKotlinDsl())
@@ -136,8 +135,8 @@ afterEvaluate {
 
 @Suppress("UnstableApiUsage")
 gradlePlugin {
-    website.set("https://github.com/DaRacci/slimjar")
-    vcsUrl.set("https://github.com/DaRacci/slimjar")
+    website.set("https://github.com/CrazyDev05/slimjar")
+    vcsUrl.set("https://github.com/CrazyDev05/slimjar")
 
     plugins {
         create("slimjar") {

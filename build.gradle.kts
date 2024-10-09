@@ -6,7 +6,7 @@ import java.net.URI
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm") version "1.9.0"
     id("com.github.hierynomus.license-base") version "0.16.1"
 }
 
@@ -45,8 +45,8 @@ allprojects {
         plugins.withType<MavenPublishPlugin> {
             extensions.getByName<PublishingExtension>("publishing").apply {
                 repositories.maven {
-                    name = "RacciRepo"
-                    url = URI("https://repo.racci.dev/${if (project.version.toString().endsWith("-SNAPSHOT")) "snapshots" else "releases"}")
+                    name = "CrazyDev22Repo"
+                    url = URI("https://repo.crazydev22.de/public")
                     credentials(PasswordCredentials::class)
                 }
             }

@@ -1,7 +1,7 @@
 // Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(libs.plugins.shadow)
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     `maven-publish`
 }
 
@@ -22,7 +22,7 @@ publishing {
         pom {
             name.set("SlimJar")
             description.set("A simple and robust runtime dependency manager for JVM languages.")
-            url.set("https://www.github.com/DaRacci/slimjar")
+            url.set("https://github.com/CrazyDev05/slimjar")
             licenses {
                 license {
                     name.set("The MIT License")
@@ -45,13 +45,18 @@ publishing {
                     id.set("Racci")
                     name.set("James Draycott")
                     email.set("racci@racci.dev")
+                    roles.set(listOf("Previous Maintainer"))
+                }
+                developer {
+                    id.set("CrazyDev05")
+                    name.set("Julian Krings")
                     roles.set(listOf("MAINTAINER"))
                 }
             }
             scm {
-                connection.set("https://github.com/DaRacci/slimjar")
-                developerConnection.set("https://github.com/DaRacci/slimjar.git")
-                url.set("https://github.com/DaRacci/slimjar")
+                connection.set("https://github.com/CrazyDev05/slimjar")
+                developerConnection.set("https://github.com/CrazyDev05/slimjar.git")
+                url.set("https://github.com/CrazyDev05/slimjar")
             }
         }
     }

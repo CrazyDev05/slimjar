@@ -1,17 +1,11 @@
 <h1 align="center">Slim Jar</h1>
 <h3 align="center">Runtime Dependency Management</h3>
   <div align="center">
-    <a href="https://github.com/DaRacci/slimjar/">
+    <a href="https://github.com/CrazyDev05/slimjar">
         <img src="https://img.shields.io/github/license/DaRacci/slimjar">
     </a>
-    <a href="https://github.com/DaRacci/slimjar/actions/workflows/gradle.yml">
-        <img src="https://github.com/DaRacci/slimjar/actions/workflows/gradle.yml/badge.svg">
-    </a>
-    <a href="https://plugins.gradle.org/plugin/io.github.slimjar">
-        <img src="https://img.shields.io/maven-metadata/v.svg?label=gradle-plugin&metadataUrl=https%3A%2F%2Frepo.racci.dev%2Freleases%2Fdev%2Fracci%2Fslimjar%2Fdev.racci.slimjar.gradle.plugin%2Fmaven-metadata.xml">
-    </a>
-    <a href="https://repo.racci.dev/releases/dev/racci/releases/slimjar/slimjar/slimjar">
-        <img src="https://img.shields.io/maven-metadata/v.svg?label=maven&metadataUrl=https%3A%2F%2Frepo.racci.dev%2Freleases%2Fdev%2Fracci%2Fslimjar%2Fslimjar%2Fmaven-metadata.xml">
+    <a href="https://github.com/CrazyDev05/slimjar/actions/workflows/gradle.yml">
+        <img src="https://github.com/CrazyDev05/slimjar/actions/workflows/gradle.yml/badge.svg">
     </a>
   </div>
 
@@ -61,9 +55,9 @@ slimJar {
 
 
 ```shell
-git clone https://github.com/DaRacci/slimjar.git
+git clone https://github.com/CrazyDev05/slimjar.git
 # or via
-gh repo clone DaRacci/slimjar
+gh repo clone CrazyDev05/slimjar
 
 cd slimjar && ./gradlew test
 ```
@@ -71,8 +65,7 @@ cd slimjar && ./gradlew test
 <br>
 <h2 align="center">Releases</h2>
 
-* https://plugins.gradle.org/plugin/dev.racci.slimjar
-* https://repo.racci.dev/releases/dev/racci/slimjar/slimjar/1.2.9
+* https://repo.crazydev22.de/public/de/crazydev22/slimjar/slimjar/1.2.9
 
 Distributed under the MIT licence. See ``LICENSE`` for more information.
 
@@ -80,7 +73,7 @@ Distributed under the MIT licence. See ``LICENSE`` for more information.
 <br>
 <h2 align="center">Contributing</h2>
 
-1. Fork it (<https://github.com/DaRacci/slimjar/fork>)
+1. Fork it (<https://github.com/CrazyDev05/slimjar/fork>)
 2. Create your feature branch (`git checkout -b feature/abcd`)
 3. Commit your changes (`git commit -am 'Added some feature abcd'`)
 4. Push to the branch (`git push origin feature/fooBar`)
