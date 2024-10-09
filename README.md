@@ -35,7 +35,7 @@ ApplicationBuilder.appending("MyApplicationName").build()
 ```kotlin
 plugins {
   id("com.github.johnrengelman.shadow") version "7.1.2"
-  id("dev.racci.slimjar") version "1.3.2"
+  id("de.crazydev22.slimjar") version "1.3.2"
 }
 dependencies {
   implementation slimjar("1.2.9")
