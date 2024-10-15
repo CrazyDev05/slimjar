@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    testImplementation("me.lucko:jar-relocator:1.5")
+    testImplementation("me.lucko:jar-relocator:1.7")
     testImplementation("com.google.code.gson:gson:2.10")
     testImplementation("org.mockito:mockito-core:4.10.0")
     testImplementation("org.mockito:mockito-inline:4.10.0")

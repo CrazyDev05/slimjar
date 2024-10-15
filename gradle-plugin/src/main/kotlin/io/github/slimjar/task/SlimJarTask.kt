@@ -89,7 +89,7 @@ public abstract class SlimJar @Inject constructor(
 
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public val buildDirectory: File = project.buildDir
+    public val buildDirectory: File = project.layout.buildDirectory.asFile.get()
 
     @get:OutputDirectory
     public val outputDirectory: File = buildDirectory.resolve("resources/slimjar/")

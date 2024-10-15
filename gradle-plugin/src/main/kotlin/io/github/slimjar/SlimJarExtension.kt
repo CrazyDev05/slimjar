@@ -36,7 +36,7 @@ public abstract class SlimJarExtension(project: Project) {
      * Defaults to false.
      */
     public val requirePreResolve: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(false).apply(Property<*>::finalizeValueOnRead)
+        .value(false).apply(Property<*>::finalizeValueOnRead)
 
     /**
      * Contracts that when building the slimjar, all pre-resolved dependencies must have a valid checksum.
@@ -44,7 +44,7 @@ public abstract class SlimJarExtension(project: Project) {
      * Defaults to false.
      */
     public val requireChecksum: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(false).apply(Property<*>::finalizeValueOnRead)
+        .value(false).apply(Property<*>::finalizeValueOnRead)
 
     /**
      * @receiver the original path

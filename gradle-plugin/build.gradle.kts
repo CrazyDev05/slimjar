@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `maven-publish`
     `java-gradle-plugin`
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.3"
     kotlin("jvm") version "1.9.0"
 }
 
@@ -26,9 +26,9 @@ dependencies {
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
-    compileOnly("com.github.johnrengelman:shadow:8.1.1")
+    compileOnly("com.gradleup.shadow:shadow-gradle-plugin:8.3.3")
 
-    testImplementation("com.github.johnrengelman:shadow:8.1.1")
+    testImplementation("com.gradleup.shadow:shadow-gradle-plugin:8.3.3")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleApi())
     testImplementation(gradleKotlinDsl())

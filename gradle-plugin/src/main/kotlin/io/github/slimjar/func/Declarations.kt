@@ -47,7 +47,7 @@ public val Project.applyReleaseRepo: Boolean
  * Checks in the gradle.properties if should or not add the slimJar snapshot repo by default
  */
 public val Project.applySnapshotRepo: Boolean
-    get() = findProperty("slimjar.default.repo.snapshot.apply")?.toString()?.toBoolean() ?: false
+    get() = findProperty("slimjar.default.repo.snapshot.apply")?.toString()?.toBoolean() ?: true
 
 /**
  * Checks in the gradle.properties if should or not add the slimJar plugin to isolated projects by default
