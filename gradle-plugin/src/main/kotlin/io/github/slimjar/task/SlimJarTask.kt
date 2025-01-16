@@ -106,7 +106,7 @@ public abstract class SlimJar @Inject constructor(
      */
     @TaskAction
     internal fun createJson() = with(project) {
-        val repositories = repositories.getMavenRepos()
+        val repositories = repositories.getMavenRepos().toSet()
         val dependencies = config.incoming.getSlimDependencies().toMutableSet()
         val extension = extensions.getByType<SlimJarExtension>()
 
