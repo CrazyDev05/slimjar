@@ -1,15 +1,13 @@
-// Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.5"
     `maven-publish`
 }
 
 dependencies {
     testImplementation("me.lucko:jar-relocator:1.7")
-    testImplementation("com.google.code.gson:gson:2.10")
-    testImplementation("org.mockito:mockito-core:4.10.0")
-    testImplementation("org.mockito:mockito-inline:4.10.0")
+    testImplementation("com.google.code.gson:gson:2.11.0")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+    testImplementation("org.mockito:mockito-inline:5.15.2")
     testImplementation("cglib:cglib:3.3.0")
 }
 

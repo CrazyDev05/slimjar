@@ -65,13 +65,13 @@ public class SlimJarPlugin : Plugin<Project> {
             )
         }
 
-        val slimJar = tasks.create(SLIM_JAR_TASK_NAME, SlimJar::class.java, slimConfig, slimJarExtension)
+        val slimJar = tasks.register(SLIM_JAR_TASK_NAME, SlimJar::class.java, slimConfig, slimJarExtension)
         project.dependencies.extra.set(
             "slimjar",
             asGroovyClosure("+") { version -> slimJarLib(version) }
         )
         // Hooks into shadow to inject relocations
-        tasks.withType<ShadowJar>() {
+        tasks.withType<ShadowJar> {
             doFirst { _ ->
                 slimExtension.relocations.forEach { rule ->
                     relocate(rule.originalPackagePattern, rule.relocatedPackagePattern) {

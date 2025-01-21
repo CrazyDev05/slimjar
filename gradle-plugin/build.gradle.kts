@@ -1,12 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-// Workaround for (https://youtrack.jetbrains.com/issue/KTIJ-19369)
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     `maven-publish`
     `java-gradle-plugin`
-    id("com.gradleup.shadow") version "8.3.3"
-    kotlin("jvm") version "1.9.0"
+    id("com.gradleup.shadow") version "8.3.5"
+    kotlin("jvm")
 }
 
 repositories {
@@ -19,16 +19,16 @@ configurations["testImplementation"].extendsFrom(shadowImplementation)
 
 dependencies {
 
-    shadowImplementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+    shadowImplementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     shadowImplementation(project(":slimjar"))
     shadowImplementation("com.google.code.gson:gson:2.10")
-    shadowImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0")
+    shadowImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1")
 
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
-    compileOnly("com.gradleup.shadow:shadow-gradle-plugin:8.3.3")
+    compileOnly("com.gradleup.shadow:shadow-gradle-plugin:8.3.5")
 
-    testImplementation("com.gradleup.shadow:shadow-gradle-plugin:8.3.3")
+    testImplementation("com.gradleup.shadow:shadow-gradle-plugin:8.3.5")
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleApi())
     testImplementation(gradleKotlinDsl())
@@ -96,10 +96,10 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "17"
-            languageVersion = "1.7"
-            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+            languageVersion.set(KotlinVersion.KOTLIN_1_7)
+            freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
         }
     }
 

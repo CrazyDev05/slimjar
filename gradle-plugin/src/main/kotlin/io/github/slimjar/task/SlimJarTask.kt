@@ -53,7 +53,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -74,7 +76,7 @@ import org.gradle.kotlin.dsl.* // ktlint-disable no-wildcard-imports
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.net.URL
+import java.net.URI
 import javax.inject.Inject
 
 @CacheableTask
@@ -178,7 +180,7 @@ public abstract class SlimJar @Inject constructor(
         // TODO: Cleanup this mess
         runBlocking(IO) {
             val globalRepositoryEnquirer = extension.globalRepositories.map { repos ->
-                repos.map { repoString -> enquirerFactory.create(Repository(URL(repoString))) }
+                repos.map { repoString -> enquirerFactory.create(Repository(URI.create(repoString).toURL())) }
             }
 
             dependencies.asFlow()
@@ -294,7 +296,12 @@ public abstract class SlimJar @Inject constructor(
     ): Flow<R> = this
         .map { scope.async { transform(it) } }
         .buffer(concurrencyLevel)
-        .map { it.await() }
+        .map { it::await.asFlow() }
+        .flattenConcat()
+
+    private fun <T> Flow<Flow<T>>.flattenConcat(): Flow<T> = flow {
+        collect { value -> emitAll(value) }
+    }
 
     protected open fun withShadowTask(
         action: ShadowJar.() -> Unit

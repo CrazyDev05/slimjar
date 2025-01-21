@@ -1,6 +1,6 @@
 rootProject.name = "slimjar"
 
-include("slimjar", "slimjar-external", "gradle-plugin", "loader-agent")
+include("slimjar", "gradle-plugin", "loader-agent")
 
 pluginManagement {
     repositories {
