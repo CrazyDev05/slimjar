@@ -3,7 +3,10 @@ on: [workflow_call, pull_request]
 
 jobs:
   validation:
+    name: "Validation"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: gradle/wrapper-validation-action@v1.1.0
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Validating wrapper
+        uses: gradle/actions/wrapper-validation@v4
