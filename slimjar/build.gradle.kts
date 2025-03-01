@@ -7,7 +7,6 @@ dependencies {
     testImplementation("me.lucko:jar-relocator:1.7")
     testImplementation("com.google.code.gson:gson:2.11.0")
     testImplementation("org.mockito:mockito-core:5.15.2")
-    testImplementation("org.mockito:mockito-inline:5.15.2")
     testImplementation("cglib:cglib:3.3.0")
 }
 
