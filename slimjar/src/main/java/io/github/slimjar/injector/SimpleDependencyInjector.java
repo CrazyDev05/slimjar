@@ -74,7 +74,7 @@ public final class SimpleDependencyInjector implements DependencyInjector {
                         synchronized (injectable) {
                             injectable.inject(depJar.toURI().toURL());
                         }
-                        LOGGER.log("Loaded library %s", depJar);
+                        LOGGER.log("Loaded library %s", depJar.toPath().normalize());
                         injectDependencies(pool, injectable, injectionHelper, dependency.transitive());
                     } catch (final IOException e) {
                         throw new InjectionFailedException(dependency, e);
@@ -89,6 +89,5 @@ public final class SimpleDependencyInjector implements DependencyInjector {
                 .toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(futures).join();
     }
-
 
 }

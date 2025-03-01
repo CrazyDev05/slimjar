@@ -31,8 +31,8 @@ import io.github.slimjar.resolver.data.Dependency;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class InjectionHelper {
     private final Set<Dependency> injectedDependencies;
@@ -50,7 +50,7 @@ public final class InjectionHelper {
     }
 
     public InjectionHelper(final DependencyDownloader dependencyDownloader, final RelocationHelper relocationHelper) {
-        this(dependencyDownloader, relocationHelper, new HashSet<>());
+        this(dependencyDownloader, relocationHelper, ConcurrentHashMap.newKeySet());
     }
 
     public File fetch(final Dependency dependency) throws IOException, ReflectiveOperationException, InterruptedException {
