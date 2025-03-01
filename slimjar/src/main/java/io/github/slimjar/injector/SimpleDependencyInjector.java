@@ -71,7 +71,9 @@ public final class SimpleDependencyInjector implements DependencyInjector {
 
                         if (depJar == null) return;
 
-                        injectable.inject(depJar.toURI().toURL());
+                        synchronized (injectable) {
+                            injectable.inject(depJar.toURI().toURL());
+                        }
                         LOGGER.log("Loaded library %s", depJar);
                         injectDependencies(pool, injectable, injectionHelper, dependency.transitive());
                     } catch (final IOException e) {
