@@ -2,7 +2,7 @@
 <h3 align="center">Runtime Dependency Management</h3>
   <div align="center">
     <a href="https://github.com/CrazyDev05/slimjar">
-        <img src="https://img.shields.io/github/license/DaRacci/slimjar">
+        <img src="https://img.shields.io/github/license/CrazyDev05/slimjar">
     </a>
     <a href="https://github.com/CrazyDev05/slimjar/actions/workflows/gradle.yml">
         <img src="https://github.com/CrazyDev05/slimjar/actions/workflows/gradle.yml/badge.svg">
@@ -35,10 +35,10 @@ ApplicationBuilder.appending("MyApplicationName").build()
 ```kotlin
 plugins {
   id("com.github.johnrengelman.shadow") version "7.1.2"
-  id("de.crazydev22.slimjar") version "1.3.2"
+  id("de.crazydev22.slimjar") version "1.7.1"
 }
 dependencies {
-  implementation slimjar("1.2.9")
+  implementation slimjar("1.7.1")
   slim("group.id:artifact.id:version")
 }
 
@@ -65,7 +65,7 @@ cd slimjar && ./gradlew test
 <br>
 <h2 align="center">Releases</h2>
 
-* https://repo.crazydev22.de/public/de/crazydev22/slimjar/slimjar/1.2.9
+* https://repo.crazydev22.de/public/de/crazydev22/slimjar/slimjar/1.7.1
 
 Distributed under the MIT licence. See ``LICENSE`` for more information.
 
