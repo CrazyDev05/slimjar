@@ -1,22 +1,21 @@
 plugins {
-    `maven-publish`
     `java-gradle-plugin`
     alias(libs.plugins.shadow)
     alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.gradle.publish)
+    alias(libs.plugins.publish.gradle)
+    alias(libs.plugins.publish.maven)
 }
 
 repositories {
     gradlePluginPortal()
-    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 val shadowImplementation: Configuration by configurations.creating
 val compileAndTest: Configuration by configurations.creating
-configurations {
+configurations.apply {
     compileAndTest.extendsFrom(shadowImplementation)
-    compileOnly.get().extendsFrom(compileAndTest)
-    testImplementation.get().extendsFrom(compileAndTest)
+    compileOnly { extendsFrom(compileAndTest) }
+    testImplementation { extendsFrom(compileAndTest) }
 }
 
 dependencies {
@@ -28,7 +27,6 @@ dependencies {
     compileAndTest(gradleKotlinDsl())
     compileAndTest(libs.gradle.shadow)
     compileAndTest(libs.gradle.kotlin.jvm)
-    compileAndTest(libs.gradle.kotlin.mpp)
 
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleTestKit())
@@ -56,8 +54,7 @@ tasks {
                 if (
                     !path.startsWith("META-INF") &&
                     path.lastName.endsWith(".class") &&
-                    !path.pathString.startsWith("io/github/slimjar") &&
-                    !path.pathString.startsWith("dev/racci/slimjar")
+                    !path.pathString.startsWith("io/github/slimjar")
                 ) nonInlinedDependencies.add(path.pathString)
             }
 
@@ -69,10 +66,7 @@ tasks {
     // Disabling default jar task as it is overridden by shadowJar
     jar { enabled = false }
 
-    test {
-        enabled = false
-        useJUnitPlatform()
-    }
+    test { enabled = false }
 
     check { dependsOn(ensureDependenciesAreInlined, validatePlugins) }
 
@@ -83,15 +77,13 @@ tasks {
         exclude("kotlin/**")
 
         listOf(
-            "me.lucko.jarrelocator",
             "com.google.gson",
-            "arrow",
+            "com.google.errorprone",
             "kotlinx",
             "org.intellij",
             "org.jetbrains.annotations",
-            "org.codehaus.mojo.animal_sniffer"
         ).map { it to it.split('.').last() }.forEach { (original, last) ->
-            relocate(original, "dev.racci.slimjar.libs.$last")
+            relocate(original, "io.github.slimjar.libs.$last")
         }
     }
 
@@ -117,12 +109,16 @@ afterEvaluate {
 }
 
 gradlePlugin {
+    website.set("https://github.com/CrazyDev05/slimjar")
+    vcsUrl.set("https://github.com/CrazyDev05/slimjar")
+
     plugins {
         create("slimjar") {
             id = group.toString()
             displayName = "SlimJar"
             description = "JVM Runtime Dependency Management."
             implementationClass = "io.github.slimjar.SlimJarPlugin"
+            tags = listOf("runtime dependency", "relocation")
         }
     }
 

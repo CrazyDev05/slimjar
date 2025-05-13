@@ -28,8 +28,10 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import dev.racci.slimjar.extension.SlimJarExtension
-import dev.racci.slimjar.extensions.maybePrefix
+import io.github.slimjar.SlimJarExtension
+import io.github.slimjar.SlimJarPlugin.Companion.SLIM_API_CONFIGURATION_NAME
+import io.github.slimjar.SlimJarPlugin.Companion.SLIM_CONFIGURATION_NAME
+import io.github.slimjar.andFinalizeValueOnRead
 import io.github.slimjar.func.performCompileTimeResolution
 import io.github.slimjar.resolver.CachingDependencyResolver
 import io.github.slimjar.resolver.ResolutionResult
@@ -39,23 +41,11 @@ import io.github.slimjar.resolver.data.Repository
 import io.github.slimjar.resolver.enquirer.PingingRepositoryEnquirerFactory
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector
 import io.github.slimjar.resolver.pinger.HttpURLPinger
-import io.github.slimjar.resolver.strategy.MavenChecksumPathResolutionStrategy
-import io.github.slimjar.resolver.strategy.MavenPathResolutionStrategy
-import io.github.slimjar.resolver.strategy.MavenPomPathResolutionStrategy
-import io.github.slimjar.resolver.strategy.MavenSnapshotPathResolutionStrategy
-import io.github.slimjar.resolver.strategy.MediatingPathResolutionStrategy
-import io.github.slimjar.slimExtension
+import io.github.slimjar.resolver.strategy.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNot
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
@@ -67,34 +57,46 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableDependency
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableModuleResult
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.setProperty
 import java.io.File
+import java.net.URI
 import java.net.URL
 import javax.inject.Inject
 
 @CacheableTask
-public abstract class SlimJarTask @Inject constructor() : DefaultTask() {
+class SlimJarTask @Inject constructor() : DefaultTask() {
 
-    protected companion object {
-        public const val TASK_GROUP: String = "slimJar"
-        public val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+    init {
+        group = "slimJar"
+    }
+
+    private companion object {
+        val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
     }
 
     @get:OutputDirectory
-    public abstract val outputDirectory: File
+    val outputDirectory: File = project.layout.buildDirectory.dir("resources/slimjar").get().asFile.also(File::mkdirs)
 
     @get:Internal
-    public abstract val slimJarExtension: SlimJarExtension
+    val slimJarExtension: SlimJarExtension = project.extensions.getByType()
 
     @get:Internal
-    public abstract val slimjarConfigurations: SetProperty<Configuration>
+    val slimjarConfigurations: SetProperty<Configuration> = project.objects.setProperty<Configuration>()
+        .convention(arrayOf(SLIM_CONFIGURATION_NAME, SLIM_API_CONFIGURATION_NAME).mapNotNull { project.configurations.findByName(it) })
+        .andFinalizeValueOnRead()
+        .andFinalizeValueOnRead()
 
     /** Action to generate the json file inside the jar */
     @TaskAction
     internal fun createJson() = with(project) {
-        val repositories = repositories.getMavenRepos()
         val dependencies = slimjarConfigurations.get().flatMap { it.incoming.getSlimDependencies() }
+        val repositories = slimJarExtension.globalRepositories.get()
+            .map { Repository(URI.create(it).toURL()) }
+            .ifEmpty { repositories.getMavenRepos() }
 
         with(outputDirectory.resolve("slimjar.json")) {
             val dependencyData = DependencyData(
@@ -144,7 +146,7 @@ public abstract class SlimJarTask @Inject constructor() : DefaultTask() {
         val mirrorSelector = SimpleMirrorSelector()
         val resolver = CachingDependencyResolver(
             urlPinger,
-            mirrorSelector.select(repositories, slimExtension.mirrors.get()),
+            mirrorSelector.select(repositories, slimJarExtension.mirrors.get()),
             enquirerFactory,
             mapOf()
         )
@@ -229,16 +231,6 @@ public abstract class SlimJarTask @Inject constructor() : DefaultTask() {
         return transitive
     }
 
-//    private fun collectTransitive(
-//        dependencies: Collection<RenderableDependency>
-//    ): Sequence<Dependency> = sequence {
-//        for (dependency in dependencies) {
-//            val dep = dependency.id.toString().toDependency(emptySequence()) ?: continue
-//            yield(dep)
-//            yieldAll(collectTransitive(dependency.children))
-//        }
-//    }
-
     /**
      * Creates a [Dependency] based on a string
      * group:artifact:version:snapshot - The
@@ -280,7 +272,7 @@ public abstract class SlimJarTask @Inject constructor() : DefaultTask() {
         .buffer(concurrencyLevel)
         .map { it.await() }
 
-    protected open fun withShadowTask(
+    private fun withShadowTask(
         action: ShadowJar.() -> Unit
-    ): ShadowJar? = (project.tasks.findByName(maybePrefix(null, null, "shadowJar")) as? ShadowJar)?.apply(action)
+    ): TaskProvider<ShadowJar> = project.tasks.named("shadowJar", ShadowJar::class.java) { it.action() }
 }

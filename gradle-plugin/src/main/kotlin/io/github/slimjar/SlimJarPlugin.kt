@@ -26,28 +26,21 @@ package io.github.slimjar
 
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.racci.minix.gradle.MinixGradlePlugin
-import dev.racci.slimjar.data.Targetable
-import dev.racci.slimjar.extension.SlimJarExtension
-import dev.racci.slimjar.extensions.targetTask
+import io.github.slimjar.exceptions.ConfigurationNotFoundException
 import io.github.slimjar.exceptions.ShadowNotFoundException
 import io.github.slimjar.task.SlimJarTask
-import org.gradle.api.GradleException
-import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.hasPlugin
-import org.gradle.language.jvm.tasks.ProcessResources
-import org.slf4j.LoggerFactory
+import org.gradle.kotlin.dsl.withType
 
-public class SlimJarPlugin : Plugin<Project> {
+class SlimJarPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = with(project) {
+        plugins.apply(JavaPlugin::class.java)
         if (!plugins.hasPlugin(ShadowPlugin::class)) {
             throw ShadowNotFoundException(
                 """
@@ -57,66 +50,59 @@ public class SlimJarPlugin : Plugin<Project> {
             )
         }
 
-        if (!plugins.hasPlugin(MinixGradlePlugin::class)) {
-            throw GradleException(
-                """
-                    SlimJar depends on the Minix plugin, please apply the plugin.
-                    For more information visit: https://github.com/DaRacci/Minix-Conventions/
-                """.trimIndent()
+        extensions.create(SLIM_EXTENSION_NAME, SlimJarExtension::class.java, project)
+        createConfig(
+            SLIM_CONFIGURATION_NAME,
+            JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
+            JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME
+        )
+
+        if (plugins.hasPlugin("java-library")) {
+            createConfig(
+                SLIM_API_CONFIGURATION_NAME,
+                JavaPlugin.COMPILE_ONLY_API_CONFIGURATION_NAME,
+                JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME
             )
         }
 
-        if (!plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
-            logger.warn("Eagerly applying java to the project because multiplatform was not found!")
-            apply(plugin = "java")
-        }
-    }
+        val slimJar = tasks.register(SLIM_JAR_TASK_NAME, SlimJarTask::class.java)
+        // The fuck does this do?
+        dependencies.extra.set(
+            "slimjar",
+            asGroovyClosure("+", ::slimJarLib)
+        )
 
-    public companion object {
-        public val SLIM_CONFIGURATION_NAME: Targetable = Targetable("slim")
-        public val SLIM_API_CONFIGURATION_NAME: Targetable = Targetable("slimApi")
-        public val SLIM_JAR_TASK_NAME: Targetable = Targetable("slimJar")
-        public val SLIM_EXTENSION_NAME: Targetable = Targetable("slimJar")
-
-        internal fun Project.createConfig(
-            configurationName: String,
-            configure: Configuration.() -> Unit = {}
-        ): NamedDomainObjectProvider<Configuration> = project.configurations.register(configurationName) { config ->
-            config.isTransitive = true
-            config.configure()
-        }
-
-        internal inline fun <reified T : SlimJarTask> Project.createTask(
-            target: Named? = null,
-            extension: SlimJarExtension,
-            vararg constructorArgs: Any
-        ) {
-            val slimJarTask = tasks.create<T>(SLIM_JAR_TASK_NAME.forNamed(target), *constructorArgs)
-
-            // The fuck does this do?
-            dependencies.extra.set(
-                "slimjar",
-                asGroovyClosure("+", ::slimJarLib)
-            )
-
-            // Hooks into shadow to inject relocations
-            tasks.targetTask<ShadowJar>(target, "shadowJar") {
-                doFirst {
-                    extension.relocations.get().forEach { rule ->
-                        relocate(rule.originalPackagePattern(), rule.relocatedPackagePattern()) {
-                            rule.inclusions().forEach { include(it) }
-                            rule.exclusions().forEach { exclude(it) }
-                        }
+        // Hooks into shadow to inject relocations
+        tasks.withType<ShadowJar> {
+            doFirst { _ ->
+                slimExtension.relocations.get().forEach { rule ->
+                    relocate(rule.originalPackagePattern, rule.relocatedPackagePattern) {
+                        rule.inclusions.forEach { include(it) }
+                        rule.exclusions.forEach { exclude(it) }
                     }
                 }
             }
+        }
 
-            // Runs the task once resources are being processed to save the json file.
-            tasks.targetTask<ProcessResources>(target, JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-                finalizedBy(slimJarTask)
-            }
+        // Runs the task once resources are being processed to save the json file
+        tasks.findByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)?.finalizedBy(slimJar)
+    }
+
+    companion object {
+        const val SLIM_CONFIGURATION_NAME: String = "slim"
+        const val SLIM_API_CONFIGURATION_NAME: String = "slimApi"
+        const val SLIM_JAR_TASK_NAME: String = "slimJar"
+        const val SLIM_EXTENSION_NAME: String = "slimJar"
+
+        internal fun Project.createConfig(
+            configurationName: String,
+            vararg extends: String
+        ): NamedDomainObjectProvider<Configuration> = project.configurations.register(configurationName) { config ->
+            config.isTransitive = true
+            extends.map { configurations.findByName(it) ?: throw ConfigurationNotFoundException("Could not find `$extends` configuration!") }
+                .forEach { it.extendsFrom(config) }
         }
     }
 }
 
-internal fun slimJarLib(version: String) = "dev.racci.slimjar:slimjar:$version"
+internal fun slimJarLib(version: String) = "de.crazydev22.slimjar:slimjar:$version"

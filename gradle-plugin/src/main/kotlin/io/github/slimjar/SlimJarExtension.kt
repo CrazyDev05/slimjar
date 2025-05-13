@@ -1,35 +1,34 @@
-package dev.racci.slimjar.extension
+package io.github.slimjar
 
-import io.github.slimjar.andDisallowUnsafeRead
-import io.github.slimjar.andFinalizeValueOnRead
+import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+import io.github.slimjar.func.slimInjectToIsolated
 import io.github.slimjar.relocation.RelocationConfig
 import io.github.slimjar.relocation.RelocationRule
 import io.github.slimjar.resolver.data.Mirror
+import io.github.slimjar.task.SlimJarTask
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
+import org.gradle.kotlin.dsl.withType
 
-public abstract class SlimJarExtension protected constructor(project: Project) {
+abstract class SlimJarExtension protected constructor(project: Project) {
+    val isolatedProjects: SetProperty<Project> = project.objects.setProperty()
 
     @get:Input
     @get:Optional
-    public val relocations: SetProperty<RelocationRule> = project.objects.setProperty<RelocationRule>()
+    val relocations: SetProperty<RelocationRule> = project.objects.setProperty<RelocationRule>()
         .andFinalizeValueOnRead().andDisallowUnsafeRead()
 
     @get:Input
     @get:Optional
-    public val mirrors: SetProperty<Mirror> = project.objects.setProperty<Mirror>()
+    val mirrors: SetProperty<Mirror> = project.objects.setProperty<Mirror>()
         .andFinalizeValueOnRead().andDisallowUnsafeRead()
-
-    @get:Input
-    @get:Optional
-    public val compileTimeResolution: Property<Boolean> = project.objects.property<Boolean>()
-        .convention(true).andFinalizeValueOnRead().andDisallowUnsafeRead()
 
     /**
      * Sets a global repositories that will be used to resolve dependencies,
@@ -39,7 +38,7 @@ public abstract class SlimJarExtension protected constructor(project: Project) {
      */
     @get:Input
     @get:Optional
-    public val globalRepositories: SetProperty<String> = project.objects.setProperty<String>()
+    val globalRepositories: SetProperty<String> = project.objects.setProperty<String>()
         .andFinalizeValueOnRead().andDisallowUnsafeRead()
 
     /**
@@ -50,7 +49,7 @@ public abstract class SlimJarExtension protected constructor(project: Project) {
      */
     @get:Input
     @get:Optional
-    public val requirePreResolve: Property<Boolean> = project.objects.property<Boolean>()
+    val requirePreResolve: Property<Boolean> = project.objects.property<Boolean>()
         .convention(false).andFinalizeValueOnRead().andDisallowUnsafeRead()
 
     /**
@@ -60,7 +59,7 @@ public abstract class SlimJarExtension protected constructor(project: Project) {
      */
     @get:Input
     @get:Optional
-    public val requireChecksum: Property<Boolean> = project.objects.property<Boolean>()
+    val requireChecksum: Property<Boolean> = project.objects.property<Boolean>()
         .convention(false).andFinalizeValueOnRead().andDisallowUnsafeRead()
 
     /**
@@ -68,12 +67,30 @@ public abstract class SlimJarExtension protected constructor(project: Project) {
      * @param target the prefixed path to relocate to.
      */
     @JvmName("relocateInfix")
-    public infix fun String.relocate(target: String) {
+    infix fun String.relocate(target: String) {
         addRelocation(this, target)
     }
 
-    public fun relocate(original: String, target: String) {
+    fun relocate(original: String, target: String) {
         addRelocation(original, target)
+    }
+
+    fun isolate(target: Project) {
+        isolatedProjects.add(target)
+
+        if (target.slimInjectToIsolated) {
+            target.pluginManager.apply(ShadowPlugin::class.java)
+            target.pluginManager.apply(SlimJarPlugin::class.java)
+            target.getTasksByName("slimJar", true).firstOrNull()?.setProperty("shade", false)
+        }
+
+        target.tasks {
+            val jarTask = findByName("reobfJar")
+                ?: findByName("shadowJar")
+                ?: findByName("jar") ?: return@tasks
+
+            withType<SlimJarTask> { dependsOn(jarTask) }
+        }
     }
 
     private fun addRelocation(

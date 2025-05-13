@@ -29,11 +29,11 @@ import org.gradle.api.Project
 /**
  * Checks in the gradle.properties if should or not resolve dependencies at compile time
  */
-public val Project.performCompileTimeResolution: Boolean
+val Project.performCompileTimeResolution: Boolean
     get() = findProperty("slimjar.default.resolution.compile_time")?.toString()?.toBoolean() ?: true
 
 /**
  * Checks in the gradle.properties if should or not add the slimJar plugin to isolated projects by default
  */
-public val Project.slimInjectToIsolated: Boolean
+val Project.slimInjectToIsolated: Boolean
     get() = findProperty("slimjar.default.isolated.inject")?.toString()?.toBoolean() ?: true

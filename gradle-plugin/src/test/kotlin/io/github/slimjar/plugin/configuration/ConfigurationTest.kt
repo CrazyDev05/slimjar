@@ -46,27 +46,27 @@ class ConfigurationTest {
 
     @Test
     fun `Test slim configuration exists`() {
-        val config = project.configurations.findByName(SlimJarPlugin.SLIM_CONFIGURATION_NAME.get())
+        val config = project.configurations.findByName(SlimJarPlugin.SLIM_CONFIGURATION_NAME)
         assertThat(config).isNotNull
     }
 
     @Test
     fun `Test slimApi configuration exists`() {
-        val config = project.configurations.findByName(SlimJarPlugin.SLIM_API_CONFIGURATION_NAME.get())
+        val config = project.configurations.findByName(SlimJarPlugin.SLIM_API_CONFIGURATION_NAME)
         assertThat(config).isNotNull
     }
 
     @Test
     fun `Test add slim dependency`() {
         assertThatCode {
-            project.dependencies.add(SlimJarPlugin.SLIM_CONFIGURATION_NAME.get(), "com.google.code.gson:gson:2.8.6")
+            project.dependencies.add(SlimJarPlugin.SLIM_CONFIGURATION_NAME, "com.google.code.gson:gson:2.8.6")
         }.doesNotThrowAnyException()
     }
 
     @Test
     fun `Test add slimApi dependency`() {
         assertThatCode {
-            project.dependencies.add(SlimJarPlugin.SLIM_API_CONFIGURATION_NAME.get(), "com.google.code.gson:gson:2.8.6")
+            project.dependencies.add(SlimJarPlugin.SLIM_API_CONFIGURATION_NAME, "com.google.code.gson:gson:2.8.6")
         }.doesNotThrowAnyException()
     }
 }

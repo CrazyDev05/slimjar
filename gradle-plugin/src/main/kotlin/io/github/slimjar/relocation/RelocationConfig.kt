@@ -29,29 +29,29 @@ import org.gradle.api.internal.catalog.ExternalModuleDependencyFactory
 /**
  * Added as a wrapper for the [RelocationRule] due to Gradle not liking it
  */
-public class RelocationConfig {
+class RelocationConfig {
 
     internal val inclusions = mutableListOf<String>()
     internal val exclusions = mutableListOf<String>()
 
-    public fun include(vararg pattern: String): RelocationConfig {
+    fun include(vararg pattern: String): RelocationConfig {
         // Shadow does some normalization, might be worth looking into
         inclusions.addAll(pattern)
         return this
     }
 
-    public fun exclude(vararg pattern: String): RelocationConfig {
+    fun exclude(vararg pattern: String): RelocationConfig {
         // Shadow does some normalization, might be worth looking into
         exclusions.addAll(pattern)
         return this
     }
 
-    public fun include(vararg patterns: ExternalModuleDependencyFactory.DependencyNotationSupplier): RelocationConfig {
+    fun include(vararg patterns: ExternalModuleDependencyFactory.DependencyNotationSupplier): RelocationConfig {
         inclusions.addAll(patterns.map { it.asProvider().get().module.toString() }.toTypedArray())
         return this
     }
 
-    public fun exclude(vararg patterns: ExternalModuleDependencyFactory.DependencyNotationSupplier): RelocationConfig {
+    fun exclude(vararg patterns: ExternalModuleDependencyFactory.DependencyNotationSupplier): RelocationConfig {
         exclusions.addAll(patterns.map { it.asProvider().get().module.toString() }.toTypedArray())
         return this
     }

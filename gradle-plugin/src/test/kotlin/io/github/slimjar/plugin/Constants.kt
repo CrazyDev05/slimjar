@@ -25,13 +25,11 @@
 package io.github.slimjar.plugin
 
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
-import dev.racci.minix.gradle.MinixGradlePlugin
 import io.github.slimjar.SlimJarPlugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 
 fun Project.applyPlugins() {
-    project.apply<MinixGradlePlugin>()
     project.apply<ShadowPlugin>()
     project.apply<SlimJarPlugin>()
 }
