@@ -2,7 +2,7 @@ plugins {
     `maven-publish`
     `java-gradle-plugin`
     alias(libs.plugins.shadow)
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.gradle.publish)
 }
 
@@ -19,19 +19,16 @@ configurations {
     testImplementation.get().extendsFrom(compileAndTest)
 }
 
-@Suppress("UnstableApiUsage")
 dependencies {
     shadowImplementation(project(":runtime"))
-    shadowImplementation("com.google.code.gson:gson:2.10")
-    shadowImplementation(libs.kotlinx.coroutines)
+    shadowImplementation(libs.gson)
+    shadowImplementation(libs.kotlin.coroutines)
 
     compileAndTest(gradleApi())
     compileAndTest(gradleKotlinDsl())
     compileAndTest(libs.gradle.shadow)
-    compileAndTest(libs.gradle.minecraft.paperweight)
     compileAndTest(libs.gradle.kotlin.jvm)
     compileAndTest(libs.gradle.kotlin.mpp)
-    compileAndTest("dev.racci.minix:dev.racci.minix.gradle.plugin:0.5.0")
 
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleTestKit())
@@ -130,11 +127,4 @@ gradlePlugin {
     }
 
     testSourceSets(sourceSets.test.get())
-}
-
-pluginBundle {
-    website = "https://github.com/DaRacci/slimjar"
-    vcsUrl = "https://github.com/DaRacci/slimjar"
-    tags = listOf("runtime dependency", "relocation")
-    description = "Very easy to setup and downloads any public dependency at runtime!"
 }

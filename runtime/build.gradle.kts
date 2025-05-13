@@ -3,14 +3,12 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.jetbrains:annotations:23.1.0")
-
-    testImplementation("org.jetbrains:annotations:23.1.0")
-    testImplementation("me.lucko:jar-relocator:1.6")
-    testImplementation("com.google.code.gson:gson:2.10")
-    testImplementation("org.mockito:mockito-core:4.11.0")
-    testImplementation("org.mockito:mockito-inline:4.11.0")
-    testImplementation("cglib:cglib:3.3.0")
+    compileOnly(libs.annotations)
+    
+    testImplementation(libs.annotations)
+    testImplementation(libs.jar.relocator)
+    testImplementation(libs.gson)
+    testImplementation(libs.mockito.core)
 }
 
 publishing {
@@ -18,7 +16,7 @@ publishing {
         pom {
             name.set("SlimJar")
             description.set("A simple and robust runtime dependency manager for JVM languages.")
-            url.set("https://www.github.com/DaRacci/slimjar")
+            url.set("https://github.com/CrazyDev05/slimjar")
             licenses {
                 license {
                     name.set("The MIT License")
@@ -41,13 +39,18 @@ publishing {
                     id.set("Racci")
                     name.set("James Draycott")
                     email.set("racci@racci.dev")
+                    roles.set(listOf("Previous Maintainer"))
+                }
+                developer {
+                    id.set("CrazyDev05")
+                    name.set("Julian Krings")
                     roles.set(listOf("MAINTAINER"))
                 }
             }
             scm {
-                connection.set("https://github.com/DaRacci/slimjar")
-                developerConnection.set("https://github.com/DaRacci/slimjar.git")
-                url.set("https://github.com/DaRacci/slimjar")
+                connection.set("https://github.com/CrazyDev05/slimjar")
+                developerConnection.set("https://github.com/CrazyDev05/slimjar.git")
+                url.set("https://github.com/CrazyDev05/slimjar")
             }
         }
     }

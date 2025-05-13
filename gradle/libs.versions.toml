@@ -1,0 +1,33 @@
+[versions]
+kotlin = "2.1.20"
+kotlin-coroutines = "1.9.0"
+shadow = "8.3.6"
+licenser = "2.1.1"
+gradle-publish = "1.3.1"
+
+jupiter = "5.12.2"
+mockito = "5.17.0"
+
+jar-relocator = "1.7"
+annotations = "24.0.0"
+gson = "2.13.1"
+
+[libraries]
+jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter" }
+jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
+gradle-shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
+gradle-kotlin-jvm = { module = "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin", version.ref = "kotlin" }
+gradle-kotlin-mpp = { module = "org.jetbrains.kotlin.multiplatform:org.jetbrains.kotlin.multiplatform.gradle.plugin", version.ref = "kotlin" }
+
+jar-relocator = { module = "me.lucko:jar-relocator", version.ref = "jar-relocator" }
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+[plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+licenser = { id = "dev.yumi.gradle.licenser", version.ref = "licenser" }
+gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }

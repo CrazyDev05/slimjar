@@ -1,29 +1,25 @@
-import com.hierynomus.gradle.license.LicenseBasePlugin
+import dev.yumi.gradle.licenser.YumiLicenserGradlePlugin
 
 plugins {
-    alias(libs.plugins.minix)
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.gradle.license)
-}
-
-minix.publishing {
-    create("gradle-plugin")
-    create("slimjar")
+    alias(libs.plugins.licenser)
+    java
 }
 
 subprojects {
     apply<JavaLibraryPlugin>()
-    apply<LicenseBasePlugin>()
+    apply<YumiLicenserGradlePlugin>()
+
+    repositories {
+        mavenCentral()
+    }
 
     license {
-        header = rootProject.file("LICENSE")
-        includes(listOf("**/*.java', '**/*.kt"))
-        mapping("kt", "DOUBLESLASH_STYLE")
-        mapping("java", "DOUBLESLASH_STYLE")
+        rule(rootProject.file("LICENSE"))
+        include("**/*.java", "**/*.kt")
     }
 
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+        testImplementation(rootProject.libs.jupiter.api)
+        testRuntimeOnly(rootProject.libs.jupiter.engine)
     }
 }
