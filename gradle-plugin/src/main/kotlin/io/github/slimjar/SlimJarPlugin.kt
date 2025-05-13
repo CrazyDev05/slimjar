@@ -105,4 +105,4 @@ class SlimJarPlugin : Plugin<Project> {
     }
 }
 
-internal fun slimJarLib(version: String) = "de.crazydev22.slimjar:slimjar:$version"
+internal fun slimJarLib(version: String) = "de.crazydev22.slimjar:runtime:$version"

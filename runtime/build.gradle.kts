@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     alias(libs.plugins.publish.maven)
 }
@@ -14,9 +12,6 @@ dependencies {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    signAllPublications()
-
     pom {
         name.set("SlimJar")
         description.set("A simple and robust runtime dependency manager for JVM languages.")

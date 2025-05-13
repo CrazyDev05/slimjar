@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     `java-gradle-plugin`
     alias(libs.plugins.shadow)
@@ -93,6 +95,11 @@ tasks {
     }
 
     withType<GenerateModuleMetadata> { enabled = false }
+}
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
 }
 
 // Required for plugin substitution to work in sample projects.
