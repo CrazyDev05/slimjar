@@ -87,7 +87,11 @@ tasks {
     }
 
     whenTaskAdded {
-        if (name != "publishPluginJar" && name != "generateMetadataFileForPluginMavenPublication") return@whenTaskAdded
+        if (name == "generateMetadataFileForPluginMavenPublication")
+            dependsOn(shadowJar)
+    }
+
+    publishPlugins {
         dependsOn(shadowJar)
     }
 
