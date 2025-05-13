@@ -1,7 +1,3 @@
-plugins {
-    alias(libs.plugins.publish.maven)
-}
-
 dependencies {
     compileOnly(libs.annotations)
     

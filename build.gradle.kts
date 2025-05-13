@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.MavenPublishPlugin
 import dev.yumi.gradle.licenser.YumiLicenserGradlePlugin
 
 plugins {
@@ -7,6 +8,10 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.publish.maven) apply false
     java
+}
+
+project(":runtime") {
+    apply<MavenPublishPlugin>()
 }
 
 subprojects {
