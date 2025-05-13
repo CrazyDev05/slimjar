@@ -1,11 +1,8 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     `java-gradle-plugin`
     alias(libs.plugins.shadow)
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.publish.gradle)
-    alias(libs.plugins.publish.maven)
 }
 
 repositories {
@@ -95,11 +92,6 @@ tasks {
     }
 
     withType<GenerateModuleMetadata> { enabled = false }
-}
-
-mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    signAllPublications()
 }
 
 // Required for plugin substitution to work in sample projects.
