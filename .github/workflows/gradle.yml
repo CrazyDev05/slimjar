@@ -53,7 +53,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew test
 
-  publish:
+  snapshot:
     needs: test
     if: github.ref == 'refs/heads/2.x.x' && github.repository == 'CrazyDev05/slimjar'
     uses: ./.github/workflows/publish-snapshot.yml
