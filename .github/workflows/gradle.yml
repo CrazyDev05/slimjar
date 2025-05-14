@@ -3,9 +3,9 @@ name: Gradle CI
 on:
   workflow_dispatch:
   push:
-    branches: [ 1.x.x ]
+    branches: [ 2.x.x ]
   pull_request:
-    branches: [ 1.x.x ]
+    branches: [ 2.x.x ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
