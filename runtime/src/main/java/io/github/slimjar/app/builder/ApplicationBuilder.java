@@ -91,6 +91,7 @@ public abstract class ApplicationBuilder {
     @Nullable private Path downloadDirectoryPath;
     @Nullable private RelocatorFactory relocatorFactory;
     @Nullable private DependencyDataProviderFactory moduleDataProviderFactory;
+    @Nullable private PreResolutionDataProviderFactory modulePreResolutionDataProviderFactory;
     @Nullable private DependencyDataProviderFactory dataProviderFactory;
     @Nullable private PreResolutionDataProviderFactory preResolutionDataProviderFactory;
     @Nullable private RelocationHelperFactory relocationHelperFactory;
@@ -208,6 +209,18 @@ public abstract class ApplicationBuilder {
     @Contract(value = "_ -> this", mutates = "this")
     public final @NotNull ApplicationBuilder moduleDataProviderFactory(@NotNull final DependencyDataProviderFactory moduleDataProviderFactory) {
         this.moduleDataProviderFactory = moduleDataProviderFactory;
+        return this;
+    }
+
+    /**
+     * Factory that produces {@link PreResolutionDataProvider} for modules in jar-in-jar classloading. Ignored if not using jar-in-jar/isolated(...)
+     * Used to fetch the `slimjar.json` file of each submodule.
+     * @param modulePreResolutionDataProviderFactory Factory that produces DataProvider for modules in jar-in-jar
+     * @return <code>this</code>
+     */
+    @Contract(value = "_ -> this", mutates = "this")
+    public final @NotNull ApplicationBuilder modulePreResolutionDataProviderFactory(@NotNull final  PreResolutionDataProviderFactory modulePreResolutionDataProviderFactory) {
+        this.modulePreResolutionDataProviderFactory = modulePreResolutionDataProviderFactory;
         return this;
     }
 
@@ -362,6 +375,16 @@ public abstract class ApplicationBuilder {
         }
 
         return moduleDataProviderFactory;
+    }
+
+    @Contract(mutates = "this")
+    protected final @NotNull PreResolutionDataProviderFactory getModulePreResolutionDataProviderFactory() {
+        if (modulePreResolutionDataProviderFactory == null) {
+            final var gsonFacadeFactory = ReflectiveGsonFacadeFactory.create(getDownloadDirectoryPath(), Collections.singleton(Repository.central()));
+            this.modulePreResolutionDataProviderFactory = new GsonPreResolutionDataProviderFactory(gsonFacadeFactory);
+        }
+
+        return modulePreResolutionDataProviderFactory;
     }
 
     @Contract(mutates = "this")

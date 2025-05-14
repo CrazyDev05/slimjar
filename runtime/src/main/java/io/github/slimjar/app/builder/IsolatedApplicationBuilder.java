@@ -69,9 +69,8 @@ public final class IsolatedApplicationBuilder extends ApplicationBuilder {
 
         for (final var module : moduleUrls) {
             final var moduleDataProvider = getModuleDataProviderFactory().create(module);
-            final var dependencyData = moduleDataProvider.get();
-            // TODO:: fetch isolated pre-resolutions
-            injector.inject(classLoader, dependencyData, preResolutionResultMap);
+            final var modulePreResolutionDataProvider = getModulePreResolutionDataProviderFactory().create(module);
+            injector.inject(classLoader, moduleDataProvider.get(), modulePreResolutionDataProvider.get());
         }
 
         try {
