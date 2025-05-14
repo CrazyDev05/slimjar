@@ -36,6 +36,12 @@ subprojects {
         testRuntimeOnly(rootProject.libs.jupiter.engine)
     }
 
+    tasks {
+        listOf("applyLicenses", "checkLicenses", "checkLicenseMain", "checkLicenseTest").forEach {
+            named(it) { enabled = false }
+        }
+    }
+
     extensions.findByType<MavenPublishBaseExtension>()?.apply {
         publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
         signAllPublications()
