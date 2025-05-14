@@ -1,17 +1,17 @@
 <h1 align="center">Slim Jar</h1>
 <h3 align="center">Runtime Dependency Management</h3>
   <div align="center">
-    <a href="https://github.com/DaRacci/slimjar/">
-        <img src="https://img.shields.io/github/license/DaRacci/slimjar">
+    <a href="https://github.com/CrazyDev05/slimjar/">
+        <img src="https://img.shields.io/github/license/CrazyDev05/slimjar">
     </a>
-    <a href="https://github.com/DaRacci/slimjar/actions/workflows/gradle.yml">
-        <img src="https://github.com/DaRacci/slimjar/actions/workflows/gradle.yml/badge.svg">
+    <a href="https://github.com/CrazyDev05/slimjar/actions/workflows/gradle.yml">
+        <img src="https://github.com/CrazyDev05/slimjar/actions/workflows/gradle.yml/badge.svg">
     </a>
-    <a href="https://plugins.gradle.org/plugin/io.github.slimjar">
-        <img src="https://img.shields.io/maven-metadata/v.svg?label=gradle-plugin&metadataUrl=https%3A%2F%2Frepo.racci.dev%2Freleases%2Fdev%2Fracci%2Fslimjar%2Fdev.racci.slimjar.gradle.plugin%2Fmaven-metadata.xml">
+    <a href="https://plugins.gradle.org/plugin/de.crazydev22.slimjar">
+        <img src="https://img.shields.io/maven-metadata/v.svg?label=gradle-plugin&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fde%2Fcrazydev22%2Fslimjar%2Fde.crazydev22.slimjar.gradle.plugin%2Fmaven-metadata.xml">
     </a>
-    <a href="https://repo.racci.dev/releases/dev/racci/releases/slimjar/slimjar/slimjar">
-        <img src="https://img.shields.io/maven-metadata/v.svg?label=maven&metadataUrl=https%3A%2F%2Frepo.racci.dev%2Freleases%2Fdev%2Fracci%2Fslimjar%2Fslimjar%2Fmaven-metadata.xml">
+    <a href=https://central.sonatype.com/artifact/de.crazydev22.slimjar/runtime/versions">
+        <img src="https://img.shields.io/maven-metadata/v.svg?label=maven&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fde%2Fcrazydev22%2Fslimjar%2Fruntime%2Fmaven-metadata.xml">
     </a>
   </div>
 
@@ -36,15 +36,14 @@ SlimJar makes the process of switching out jars easier by providing jars that ar
 // this needs to be ran before you reference your dependencies
 ApplicationBuilder.appending("MyApplicationName").build()
 ```
-(NOTE: If you have specified relocations and are running in a IDE or any environment that does not use the shadowjar-ed build file, use the `ignoreRelocation` flag while running by using `-DignoreRelocation` in your runner arguments)
 *build.gradle.kts*
 ```kotlin
-plugins {
-  id("com.github.johnrengelman.shadow") version "7.1.2"
-  id("dev.racci.slimjar") version "1.3.2"
+plugins { 
+  id("com.gradleup.shadow") version "8.3.6"
+  id("de.crazydev22.slimjar") version "2.0.0"
 }
 dependencies {
-  implementation slimjar("1.2.9")
+  implementation slimjar("2.0.0")
   slim("group.id:artifact.id:version")
 }
 
@@ -61,9 +60,9 @@ slimJar {
 
 
 ```shell
-git clone https://github.com/DaRacci/slimjar.git
+git clone https://github.com/CrazyDev05/slimjar.git
 # or via
-gh repo clone DaRacci/slimjar
+gh repo clone CrazyDev05/slimjar
 
 cd slimjar && ./gradlew test
 ```
@@ -71,8 +70,8 @@ cd slimjar && ./gradlew test
 <br>
 <h2 align="center">Releases</h2>
 
-* https://plugins.gradle.org/plugin/dev.racci.slimjar
-* https://repo.racci.dev/releases/dev/racci/slimjar/slimjar/1.2.9
+* https://plugins.gradle.org/plugin/de.crazydev22.slimjar
+* https://central.sonatype.com/artifact/de.crazydev22.slimjar/runtime
 
 Distributed under the MIT licence. See ``LICENSE`` for more information.
 
@@ -80,7 +79,7 @@ Distributed under the MIT licence. See ``LICENSE`` for more information.
 <br>
 <h2 align="center">Contributing</h2>
 
-1. Fork it (<https://github.com/DaRacci/slimjar/fork>)
+1. Fork it (<https://github.com/CrazyDev05/slimjar/fork>)
 2. Create your feature branch (`git checkout -b feature/abcd`)
 3. Commit your changes (`git commit -am 'Added some feature abcd'`)
 4. Push to the branch (`git push origin feature/fooBar`)

@@ -24,7 +24,9 @@
 
 package io.github.slimjar.func
 
+import io.github.slimjar.slimJarLib
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.DependencyHandler
 
 /**
  * Checks in the gradle.properties if should or not resolve dependencies at compile time
@@ -37,3 +39,5 @@ val Project.performCompileTimeResolution: Boolean
  */
 val Project.slimInjectToIsolated: Boolean
     get() = findProperty("slimjar.default.isolated.inject")?.toString()?.toBoolean() ?: true
+
+fun DependencyHandler.slimjar(version: String) = slimJarLib(version)
