@@ -53,7 +53,8 @@ tasks {
                 if (
                     !path.startsWith("META-INF") &&
                     path.lastName.endsWith(".class") &&
-                    !path.pathString.startsWith("io/github/slimjar")
+                    !path.pathString.startsWith("io/github/slimjar") &&
+                    !path.startsWith("_COROUTINE")
                 ) nonInlinedDependencies.add(path.pathString)
             }
 
