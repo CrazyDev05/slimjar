@@ -62,10 +62,10 @@ tasks {
         }
     }
 
-    // Disabling default jar task as it is overridden by shadowJar
-    jar { enabled = false }
-
-    test { enabled = false }
+    jar {
+        enabled = false
+        dependsOn(shadowJar)
+    }
 
     check { dependsOn(ensureDependenciesAreInlined, validatePlugins) }
 
@@ -86,29 +86,7 @@ tasks {
         }
     }
 
-    whenTaskAdded {
-        if (name == "generateMetadataFileForPluginMavenPublication")
-            dependsOn(shadowJar)
-    }
-
-    publishPlugins {
-        dependsOn(shadowJar)
-    }
-
     withType<GenerateModuleMetadata> { enabled = false }
-}
-
-// Required for plugin substitution to work in sample projects.
-artifacts {
-    add("runtimeOnly", tasks.shadowJar)
-}
-
-// Work around publishing shadow jars
-afterEvaluate {
-    publishing.publications
-        .withType<MavenPublication>()
-        .filter { it.name == "pluginMaven" }
-        .forEach { publication -> publication.setArtifacts(listOf(tasks.shadowJar)) }
 }
 
 gradlePlugin {
