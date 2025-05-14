@@ -122,7 +122,7 @@ public abstract class ApplicationBuilder {
     public static @NotNull ApplicationBuilder isolated(
         @NotNull final String name,
         @NotNull final IsolationConfiguration config,
-        @NotNull Object... args
+        @Nullable Object @NotNull ... args
     ) {
         return new IsolatedApplicationBuilder(name, config, args);
     }
