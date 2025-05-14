@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   validate:
-    uses: ./.github/workflows/wrapper-validation.yaml@2.x.x
+    uses: ./.github/workflows/wrapper-validation.yml
 
   build:
     needs: validate
