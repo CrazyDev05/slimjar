@@ -14,6 +14,10 @@ project(":runtime") {
     apply<MavenPublishPlugin>()
 }
 
+project(":gradle-plugin") {
+    apply<MavenPublishPlugin>()
+}
+
 subprojects {
     apply<JavaLibraryPlugin>()
     apply<YumiLicenserGradlePlugin>()
@@ -33,7 +37,7 @@ subprojects {
     }
 
     extensions.findByType<MavenPublishBaseExtension>()?.apply {
-        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, true)
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
         signAllPublications()
 
         pom {
