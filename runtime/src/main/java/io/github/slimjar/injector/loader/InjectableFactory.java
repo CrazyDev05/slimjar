@@ -24,7 +24,6 @@
 
 package io.github.slimjar.injector.loader;
 
-import io.github.slimjar.app.builder.ApplicationBuilder;
 import io.github.slimjar.exceptions.InjectorException;
 import io.github.slimjar.resolver.data.Repository;
 import org.jetbrains.annotations.Contract;
@@ -33,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.function.Supplier;
 
 public final class InjectableFactory {
     private InjectableFactory() { }
@@ -50,45 +48,17 @@ public final class InjectableFactory {
     public static @NotNull Injectable create(
         @NotNull final Path downloadPath,
         @NotNull final Collection<Repository> repositories,
-        @NotNull final ClassLoader classLoader
+        @NotNull ClassLoader classLoader
     ) throws InjectorException {
-        final Supplier<Injectable> injector = () -> InstrumentationInjectable.create(downloadPath, repositories);
-        if (!(classLoader instanceof URLClassLoader urlClassLoader)) {
-            return injector.get();
-        }
-
-        if (isJigsawActive()) {
-            return new WrappedInjectableClassLoader((URLClassLoader) ApplicationBuilder.class.getClassLoader());
-        }
-
-        if (isUnsafeAvailable()) {
+        while (classLoader != null) {
+            if (classLoader instanceof Injectable injectable) return injectable;
+            if (classLoader instanceof URLClassLoader urlClassLoader) return new WrappedInjectableClassLoader(urlClassLoader);
             try {
-                return UnsafeInjectable.create(urlClassLoader);
-            } catch (final Exception ignored) {
-                // failed to prepare injectable with unsafe, ignored exception to let it silently switch to fallback agent injection.
-            }
+                return UnsafeInjectable.create(classLoader);
+            } catch (Throwable ignored) {}
+            classLoader = classLoader.getParent();
         }
 
-        return injector.get();
-    }
-
-    // TODO: Java support was dropped for 8, so this is not needed anymore? right?
-    private static boolean isJigsawActive() {
-        try {
-            Class.forName("java.lang.Module");
-        } catch (final ClassNotFoundException e) {
-            return true;
-        }
-        return false;
-    }
-
-    // TODO: Do all supported versions of java have this?
-    private static boolean isUnsafeAvailable() {
-        try {
-            Class.forName("sun.misc.Unsafe");
-        } catch (final ClassNotFoundException e) {
-            return false;
-        }
-        return true;
+        return InstrumentationInjectable.create(downloadPath, repositories);
     }
 }

@@ -55,4 +55,9 @@ public final class WrappedInjectableClassLoader implements Injectable {
             throw new InjectorException("Unable to invoke addURL method", e);
         }
     }
+
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
 }

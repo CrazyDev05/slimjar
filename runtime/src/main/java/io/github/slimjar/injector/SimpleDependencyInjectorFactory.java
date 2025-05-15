@@ -24,14 +24,14 @@
 
 package io.github.slimjar.injector;
 
-import io.github.slimjar.injector.helper.InjectionHelperFactory;
+import io.github.slimjar.injector.helper.DownloadHelperFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public final class SimpleDependencyInjectorFactory implements DependencyInjectorFactory {
     @Override
     @Contract("_ -> new")
-    public @NotNull DependencyInjector create(final @NotNull InjectionHelperFactory injectionHelperFactory) {
-        return new SimpleDependencyInjector(injectionHelperFactory);
+    public @NotNull DependencyInjector create(final @NotNull DownloadHelperFactory downloadHelperFactory) {
+        return new SimpleDependencyInjector(downloadHelperFactory);
     }
 }

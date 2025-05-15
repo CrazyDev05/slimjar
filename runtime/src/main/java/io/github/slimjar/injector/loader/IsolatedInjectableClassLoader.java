@@ -33,6 +33,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class IsolatedInjectableClassLoader extends InjectableClassLoader {
+    static {
+        registerAsParallelCapable();
+    }
+
     @NotNull private final Map<String, Class<?>> delegatesMap = new HashMap<>();
 
     public IsolatedInjectableClassLoader() {

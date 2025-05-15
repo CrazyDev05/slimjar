@@ -31,37 +31,28 @@ import io.github.slimjar.resolver.data.Dependency;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
-public final class InjectionHelper {
-    private final Set<Dependency> injectedDependencies;
+public final class DownloadHelper {
+    private final ConcurrentHashMap.KeySetView<Dependency, Boolean> downloadedDependencies;
     private final DependencyDownloader dependencyDownloader;
     private final RelocationHelper relocationHelper;
 
-    public InjectionHelper(
-        final DependencyDownloader dependencyDownloader,
-        final RelocationHelper relocationHelper,
-        final Set<Dependency> injectedDependencies
-    ) {
+    public DownloadHelper(final DependencyDownloader dependencyDownloader, final RelocationHelper relocationHelper) {
         this.dependencyDownloader = dependencyDownloader;
         this.relocationHelper = relocationHelper;
-        this.injectedDependencies = injectedDependencies;
+        this.downloadedDependencies = ConcurrentHashMap.newKeySet();
     }
 
-    public InjectionHelper(final DependencyDownloader dependencyDownloader, final RelocationHelper relocationHelper) {
-        this(dependencyDownloader, relocationHelper, new HashSet<>());
-    }
-
-    public @NotNull Optional<File> fetch(final Dependency dependency) throws InjectorException {
-        return dependencyDownloader.download(dependency).map(download -> {
-            injectedDependencies.add(dependency);
-            return relocationHelper.relocate(dependency, download);
-        });
-    }
-
-    public boolean isInjected(final Dependency dependency) {
-        return injectedDependencies.contains(dependency);
+    public @NotNull Stream<@NotNull File> fetch(@NotNull final Collection<Dependency> dependencies) throws InjectorException {
+        return dependencies.parallelStream()
+                .filter(downloadedDependencies::add)
+                .flatMap(dependency -> Stream.concat(
+                        fetch(dependency.transitive()),
+                        dependencyDownloader.download(dependency)
+                                .map(file -> relocationHelper.relocate(dependency, file))
+                                .stream()));
     }
 }

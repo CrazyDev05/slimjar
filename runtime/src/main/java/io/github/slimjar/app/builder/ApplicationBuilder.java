@@ -37,7 +37,7 @@ import io.github.slimjar.downloader.verify.PassthroughDependencyVerifierFactory;
 import io.github.slimjar.injector.DependencyInjector;
 import io.github.slimjar.injector.DependencyInjectorFactory;
 import io.github.slimjar.injector.SimpleDependencyInjectorFactory;
-import io.github.slimjar.injector.helper.InjectionHelperFactory;
+import io.github.slimjar.injector.helper.DownloadHelperFactory;
 import io.github.slimjar.injector.loader.Injectable;
 import io.github.slimjar.logging.LogDispatcher;
 import io.github.slimjar.logging.ProcessLogger;
@@ -495,12 +495,10 @@ public abstract class ApplicationBuilder {
 
     @Contract(value = "-> new", mutates = "this")
     protected final @NotNull DependencyInjector createInjector() {
-        final var injectionHelperFactory = new InjectionHelperFactory(
+        final var downloadHelperFactory = new DownloadHelperFactory(
             getDownloadDirectoryPath(),
             getRelocatorFactory(),
-            getDataProviderFactory(),
             getRelocationHelperFactory(),
-            getInjectorFactory(),
             getResolverFactory(),
             getEnquirerFactory(),
             getDownloaderFactory(),
@@ -508,7 +506,7 @@ public abstract class ApplicationBuilder {
             getMirrorSelector()
         );
 
-        return getInjectorFactory().create(injectionHelperFactory);
+        return getInjectorFactory().create(downloadHelperFactory);
     }
 
     @Contract(value = "-> new", mutates = "this")

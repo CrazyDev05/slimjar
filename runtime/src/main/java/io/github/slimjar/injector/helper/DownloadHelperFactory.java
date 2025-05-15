@@ -29,7 +29,6 @@ import io.github.slimjar.downloader.output.DependencyOutputWriterFactory;
 import io.github.slimjar.downloader.strategy.FilePathStrategy;
 import io.github.slimjar.downloader.verify.DependencyVerifierFactory;
 import io.github.slimjar.exceptions.InjectorException;
-import io.github.slimjar.injector.DependencyInjectorFactory;
 import io.github.slimjar.relocation.RelocatorFactory;
 import io.github.slimjar.relocation.helper.RelocationHelperFactory;
 import io.github.slimjar.resolver.DependencyResolverFactory;
@@ -37,14 +36,13 @@ import io.github.slimjar.resolver.ResolutionResult;
 import io.github.slimjar.resolver.data.DependencyData;
 import io.github.slimjar.resolver.enquirer.RepositoryEnquirerFactory;
 import io.github.slimjar.resolver.mirrors.MirrorSelector;
-import io.github.slimjar.resolver.reader.dependency.DependencyDataProviderFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.Map;
 
-public final class InjectionHelperFactory {
+public final class DownloadHelperFactory {
     @NotNull private final Path downloadDirectoryPath;
     @NotNull private final RelocatorFactory relocatorFactory;
     @NotNull private final RelocationHelperFactory relocationHelperFactory;
@@ -54,12 +52,10 @@ public final class InjectionHelperFactory {
     @NotNull private final DependencyVerifierFactory verifier;
     @NotNull private final MirrorSelector mirrorSelector;
 
-    public InjectionHelperFactory(
+    public DownloadHelperFactory(
         @NotNull final Path downloadDirectoryPath,
         @NotNull final RelocatorFactory relocatorFactory,
-        @NotNull final DependencyDataProviderFactory dataProviderFactory, // TODO: Why is this here if it's not used?
         @NotNull final RelocationHelperFactory relocationHelperFactory,
-        @NotNull final DependencyInjectorFactory injectorFactory,
         @NotNull final DependencyResolverFactory resolverFactory,
         @NotNull final RepositoryEnquirerFactory enquirerFactory,
         @NotNull final DependencyDownloaderFactory downloaderFactory,
@@ -77,7 +73,7 @@ public final class InjectionHelperFactory {
     }
 
     @Contract("_, _ -> new")
-    public @NotNull InjectionHelper create(
+    public @NotNull DownloadHelper create(
         @NotNull final DependencyData data,
         @NotNull final Map<String, ResolutionResult> preResolvedResults
     ) throws InjectorException {
@@ -89,6 +85,6 @@ public final class InjectionHelperFactory {
         final var resolver = resolverFactory.create(repositories, preResolvedResults, enquirerFactory);
         final var downloader = downloaderFactory.create(outputWriterFactory, resolver, verifier.create(resolver));
 
-        return new InjectionHelper(downloader, relocationHelper);
+        return new DownloadHelper(downloader, relocationHelper);
     }
 }

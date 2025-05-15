@@ -29,6 +29,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 
+@FunctionalInterface
 public interface Injectable {
     void inject(@NotNull final URL url) throws InjectorException;
+
+    default boolean isThreadSafe() {
+        return false;
+    }
 }

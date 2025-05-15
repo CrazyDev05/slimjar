@@ -24,12 +24,12 @@
 
 package io.github.slimjar.injector;
 
-import io.github.slimjar.injector.helper.InjectionHelperFactory;
+import io.github.slimjar.injector.helper.DownloadHelperFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface DependencyInjectorFactory {
     @Contract("_ -> new")
-    @NotNull DependencyInjector create(@NotNull final InjectionHelperFactory injectionHelperFactory);
+    @NotNull DependencyInjector create(@NotNull final DownloadHelperFactory downloadHelperFactory);
 }

@@ -29,7 +29,9 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayDeque;
@@ -48,25 +50,39 @@ public final class UnsafeInjectable implements Injectable {
     }
 
     @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
+
+    @Override
     public void inject(@NotNull final URL url) throws InjectorException {
-        unopenedURLs.addLast(url);
-        pathURLs.add(url);
+        synchronized (unopenedURLs) {
+            if (!pathURLs.contains(url)) {
+                unopenedURLs.addLast(url);
+                pathURLs.add(url);
+            }
+        }
     }
 
     @Contract("_ -> new")
-    public static @NotNull Injectable create(@NotNull final URLClassLoader classLoader) throws InjectorException {
-        final var unsafe = Unsafe.getUnsafe();
-        final ArrayDeque<URL> unopenedURLs;
-        final ArrayList<URL> pathURLs;
+    @SuppressWarnings({"unchecked"})
+    public static Injectable create(final ClassLoader classLoader) throws ReflectiveOperationException {
+        final Field field = Unsafe.class.getDeclaredField("theUnsafe");
+        field.setAccessible(true);
+        final Unsafe unsafe = (Unsafe) field.get(null);
+        final Field lookupField = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+        final MethodHandles.Lookup lookup = (MethodHandles.Lookup) unsafe.getObject(unsafe.staticFieldBase(lookupField), unsafe.staticFieldOffset(lookupField));
         try {
-            final Object ucp = fetchField(unsafe, URLClassLoader.class, classLoader, "ucp");
-            unopenedURLs = (ArrayDeque<URL>) fetchField(unsafe, ucp, "unopenedUrls");
-            pathURLs = (ArrayList<URL>) fetchField(unsafe, ucp, "path");
-        } catch (final NoSuchFieldException err) {
-            throw new InjectorException("Unable to fetch fields.", err);
+            Object ucp = lookup.findGetter(classLoader.getClass(), "ucp", lookup.findClass("jdk.internal.loader.URLClassPath")).invoke(classLoader);
+            return new UnsafeInjectable(
+                    (ArrayDeque<URL>) fetchField(unsafe, ucp, "unopenedUrls"),
+                    (ArrayList<URL>) fetchField(unsafe, ucp, "path")
+            );
+        } catch (Throwable e) {
+            if (e instanceof ReflectiveOperationException ex)
+                throw ex;
+            throw new InvocationTargetException(e);
         }
-
-        return new UnsafeInjectable(unopenedURLs, pathURLs);
     }
 
     private static Object fetchField(

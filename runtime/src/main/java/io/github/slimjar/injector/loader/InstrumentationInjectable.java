@@ -60,6 +60,11 @@ public final class InstrumentationInjectable implements Injectable {
         }
     }
 
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
+
     public static @NotNull Injectable create(
         @NotNull final Path downloadPath,
         @NotNull final Collection<Repository> repositories

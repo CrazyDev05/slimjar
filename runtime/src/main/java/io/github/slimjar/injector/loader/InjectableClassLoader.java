@@ -44,4 +44,9 @@ public abstract class InjectableClassLoader extends URLClassLoader implements In
     public void inject(@NotNull final URL url) throws InjectorException {
         addURL(url);
     }
+
+    @Override
+    public boolean isThreadSafe() {
+        return true;
+    }
 }
