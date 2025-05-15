@@ -47,7 +47,7 @@ public final class Connections {
         final int responseCode = httpConnection.getResponseCode();
 
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new IOException("Could not download from" + url); // TODO: Better exception
+            throw new IOException("Could not download from" + url + " (" + httpConnection.getResponseMessage() + ")");
         }
 
         return connection;
