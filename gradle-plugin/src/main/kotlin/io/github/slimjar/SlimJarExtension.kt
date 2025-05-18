@@ -36,13 +36,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.withType
 import javax.inject.Inject
 
-open class SlimJarExtension @Inject constructor(project: Project) {
+open class SlimJarExtension @Inject constructor(private val project: Project) {
     @get:Input
     @get:Optional
     val isolatedProjects: SetProperty<Project> = project.objects.setProperty<Project>()
@@ -109,15 +108,10 @@ open class SlimJarExtension @Inject constructor(project: Project) {
         if (target.slimInjectToIsolated) {
             target.pluginManager.apply(ShadowPlugin::class.java)
             target.pluginManager.apply(SlimJarPlugin::class.java)
-            target.getTasksByName("slimJar", true).firstOrNull()?.setProperty("shade", false)
         }
 
-        target.tasks {
-            val jarTask = findByName("reobfJar")
-                ?: findByName("shadowJar")
-                ?: findByName("jar") ?: return@tasks
-
-            withType<SlimJarTask> { dependsOn(jarTask) }
+        project.tasks.withType<SlimJarTask> {
+            dependsOn(target.tasks.targetedJarTask)
         }
     }
 

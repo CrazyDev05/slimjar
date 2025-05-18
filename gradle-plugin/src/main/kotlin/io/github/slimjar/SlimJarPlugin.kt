@@ -82,6 +82,8 @@ class SlimJarPlugin : Plugin<Project> {
                     }
                 }
             }
+            from(fileTree(project.slimResources))
+            mustRunAfter(slimJar)
         }
 
         // Runs the task once resources are being processed to save the json file

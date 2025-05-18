@@ -24,14 +24,12 @@
 
 package io.github.slimjar.task
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import io.github.slimjar.SlimJarExtension
+import io.github.slimjar.*
 import io.github.slimjar.SlimJarPlugin.Companion.SLIM_API_CONFIGURATION_NAME
 import io.github.slimjar.SlimJarPlugin.Companion.SLIM_CONFIGURATION_NAME
-import io.github.slimjar.andFinalizeValueOnRead
 import io.github.slimjar.func.performCompileTimeResolution
 import io.github.slimjar.resolver.CachingDependencyResolver
 import io.github.slimjar.resolver.ResolutionResult
@@ -42,7 +40,6 @@ import io.github.slimjar.resolver.enquirer.PingingRepositoryEnquirerFactory
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector
 import io.github.slimjar.resolver.pinger.HttpURLPinger
 import io.github.slimjar.resolver.strategy.*
-import io.github.slimjar.targetedJarTask
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -57,7 +54,6 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableDependency
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableModuleResult
-import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.setProperty
 import java.io.File
 import java.net.URI
@@ -66,25 +62,26 @@ import javax.inject.Inject
 
 @CacheableTask
 open class SlimJarTask @Inject constructor() : DefaultTask() {
-
-    init {
-        group = "slimJar"
-    }
-
-    private companion object {
-        val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
-    }
-
-    @get:OutputDirectory
-    val outputDirectory: File = project.layout.buildDirectory.dir("resources/slimjar").get().asFile.also(File::mkdirs)
+    @OutputDirectory
+    val outputDirectory: File = project.slimResources
 
     @get:Internal
-    val slimJarExtension: SlimJarExtension = project.extensions.getByType()
+    val slimJarExtension: SlimJarExtension = project.slimExtension
 
     @get:Internal
     val slimjarConfigurations: SetProperty<Configuration> = project.objects.setProperty<Configuration>()
         .convention(arrayOf(SLIM_CONFIGURATION_NAME, SLIM_API_CONFIGURATION_NAME).mapNotNull { project.configurations.findByName(it) })
         .andFinalizeValueOnRead()
+
+    init {
+        group = "slimJar"
+        inputs.files(slimjarConfigurations)
+        outputs.dir(outputDirectory)
+    }
+
+    private companion object {
+        val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+    }
 
     /** Action to generate the json file inside the jar */
     @TaskAction
@@ -93,17 +90,15 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         val repositories = slimJarExtension.globalRepositories.get()
             .map { Repository(URI.create(it).toURL()) }
             .ifEmpty { repositories.getMavenRepos() }
-
-        with(outputDirectory.resolve("slimjar.json")) {
-            val dependencyData = DependencyData(
-                slimJarExtension.mirrors.get(),
-                repositories,
-                dependencies,
-                slimJarExtension.relocations.get()
-            )
-            writer().use { writer -> GSON.toJson(dependencyData, writer) }
-            withShadowTask { from(this) }
-        }
+        val dependencyData = DependencyData(
+            slimJarExtension.mirrors.get(),
+            repositories,
+            dependencies,
+            slimJarExtension.relocations.get()
+        )
+        outputDirectory.resolve("slimjar.json")
+            .writer()
+            .use { writer -> GSON.toJson(dependencyData, writer) }
     }
 
     /** Finds jars to be isolated and adds them to the final jar. */
@@ -114,10 +109,8 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             .forEach {
                 it.tasks.targetedJarTask.apply {
                     val archive = outputs.files.singleFile
-                    if (!outputDirectory.exists()) outputDirectory.mkdirs()
                     val output = outputDirectory.resolve("${it.name}.isolated-jar")
                     archive.copyTo(output, true)
-                    withShadowTask { from(output) }
                 }
             }
     }
@@ -211,11 +204,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         }
 
         preResolved.forEach { results.putIfAbsent(it.key, it.value) }
-
-        with(file) {
-            writer().use { writer -> GSON.toJson(results, writer) }
-            withShadowTask { from(this) }
-        }
+        file.writer().use { writer -> GSON.toJson(results, writer) }
     }
 
     /**
@@ -256,8 +245,6 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             array[index] = s
         } ?: return null
 
-        println("Creating dependency from ${array.joinToString(", ") { "$it (${it?.javaClass})" }}")
-
         return Dependency::class.java.constructors.first().newInstance(*array) as Dependency
     }
 
@@ -283,8 +270,4 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         .map { scope.async { transform(it) } }
         .buffer(concurrencyLevel)
         .map { it.await() }
-
-    private fun withShadowTask(
-        action: ShadowJar.() -> Unit
-    ): TaskProvider<ShadowJar> = project.tasks.named("shadowJar", ShadowJar::class.java) { it.action() }
 }

@@ -29,11 +29,15 @@ import org.gradle.api.Task
 import org.gradle.api.provider.HasConfigurableValue
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.getByType
+import java.io.File
 
 internal val TaskContainer.targetedJarTask: Task get() {
-    return findByName("jar") ?: error("No jar task found")
+    return findByName("shadowJar")
+        ?: findByName("jar")
+        ?: error("No jar task found")
 }
 
+internal val Project.slimResources get() = layout.buildDirectory.dir("resources/slimjar").get().asFile.also(File::mkdirs)
 internal val Project.slimExtension: SlimJarExtension get() = extensions.getByType()
 
 internal fun <T : HasConfigurableValue> T.andFinalizeValueOnRead(): T = apply { finalizeValueOnRead() }
