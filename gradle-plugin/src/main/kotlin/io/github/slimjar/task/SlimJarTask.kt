@@ -68,7 +68,7 @@ import java.net.URL
 import javax.inject.Inject
 
 @CacheableTask
-class SlimJarTask @Inject constructor() : DefaultTask() {
+open class SlimJarTask @Inject constructor() : DefaultTask() {
 
     init {
         group = "slimJar"

@@ -40,8 +40,9 @@ import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.withType
+import javax.inject.Inject
 
-abstract class SlimJarExtension protected constructor(project: Project) {
+open class SlimJarExtension @Inject constructor(project: Project) {
     val isolatedProjects: SetProperty<Project> = project.objects.setProperty()
 
     @get:Input
