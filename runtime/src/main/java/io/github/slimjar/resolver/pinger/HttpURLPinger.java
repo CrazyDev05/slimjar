@@ -44,10 +44,10 @@ public final class HttpURLPinger implements URLPinger {
     public boolean ping(@NotNull final URL url) {
         final var urlStr = url.toString();
 
-        LOGGER.debug("Pinging %s" + urlStr);
+        LOGGER.debug("Pinging %s", urlStr);
 
         if (!isSupported(url)) {
-            LOGGER.error("Unsupported protocol for %s" + urlStr);
+            LOGGER.error("Unsupported protocol for %s", urlStr);
             return false;
         }
 
@@ -61,7 +61,7 @@ public final class HttpURLPinger implements URLPinger {
             LOGGER.debug("Ping %s for %s", responseOk ? "successful" : "failed", urlStr);
             return responseOk;
         } catch (final IOException err) {
-            LOGGER.error("Ping failed for %s" + urlStr);
+            LOGGER.error("Ping failed for %s", urlStr);
         } finally {
             if (connection != null) {
                 connection.disconnect();

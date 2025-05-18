@@ -29,17 +29,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class LocationAwareProcessLogger implements ProcessLogger {
+    @NotNull private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
     @NotNull private final ProcessLogger logger;
     @NotNull private final Class<?> location;
 
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull ProcessLogger wrapping(@NotNull final ProcessLogger logger) {
-        return new LocationAwareProcessLogger(logger, StackWalker.getInstance().getCallerClass());
+        return new LocationAwareProcessLogger(logger, STACK_WALKER.getCallerClass());
     }
 
     @Contract(value = " -> new", pure = true)
     public static @NotNull ProcessLogger generic() {
-        return new LocationAwareProcessLogger(LogDispatcher.getMediatingLogger(), StackWalker.getInstance().getCallerClass());
+        return new LocationAwareProcessLogger(LogDispatcher.getMediatingLogger(), STACK_WALKER.getCallerClass());
     }
 
     @Contract(pure = true)
