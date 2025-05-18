@@ -42,6 +42,7 @@ import io.github.slimjar.resolver.enquirer.PingingRepositoryEnquirerFactory
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector
 import io.github.slimjar.resolver.pinger.HttpURLPinger
 import io.github.slimjar.resolver.strategy.*
+import io.github.slimjar.targetedJarTask
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -53,11 +54,7 @@ import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableDependency
 import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableModuleResult
 import org.gradle.kotlin.dsl.getByType
@@ -88,7 +85,6 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     val slimjarConfigurations: SetProperty<Configuration> = project.objects.setProperty<Configuration>()
         .convention(arrayOf(SLIM_CONFIGURATION_NAME, SLIM_API_CONFIGURATION_NAME).mapNotNull { project.configurations.findByName(it) })
         .andFinalizeValueOnRead()
-        .andFinalizeValueOnRead()
 
     /** Action to generate the json file inside the jar */
     @TaskAction
@@ -108,6 +104,22 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             writer().use { writer -> GSON.toJson(dependencyData, writer) }
             withShadowTask { from(this) }
         }
+    }
+
+    /** Finds jars to be isolated and adds them to the final jar. */
+    @TaskAction
+    internal fun includeIsolatedJars() = with(project) {
+        slimJarExtension.isolatedProjects.get()
+            .filter { it != this }
+            .forEach {
+                it.tasks.targetedJarTask.apply {
+                    val archive = outputs.files.singleFile
+                    if (!outputDirectory.exists()) outputDirectory.mkdirs()
+                    val output = outputDirectory.resolve("${it.name}.isolated-jar")
+                    archive.copyTo(output, true)
+                    withShadowTask { from(output) }
+                }
+            }
     }
 
     @TaskAction

@@ -43,17 +43,20 @@ import org.gradle.kotlin.dsl.withType
 import javax.inject.Inject
 
 open class SlimJarExtension @Inject constructor(project: Project) {
-    val isolatedProjects: SetProperty<Project> = project.objects.setProperty()
+    @get:Input
+    @get:Optional
+    val isolatedProjects: SetProperty<Project> = project.objects.setProperty<Project>()
+        .andFinalizeValueOnRead()
 
     @get:Input
     @get:Optional
     val relocations: SetProperty<RelocationRule> = project.objects.setProperty<RelocationRule>()
-        .andFinalizeValueOnRead().andDisallowUnsafeRead()
+        .andFinalizeValueOnRead()
 
     @get:Input
     @get:Optional
     val mirrors: SetProperty<Mirror> = project.objects.setProperty<Mirror>()
-        .andFinalizeValueOnRead().andDisallowUnsafeRead()
+        .andFinalizeValueOnRead()
 
     /**
      * Sets a global repositories that will be used to resolve dependencies,
@@ -64,7 +67,7 @@ open class SlimJarExtension @Inject constructor(project: Project) {
     @get:Input
     @get:Optional
     val globalRepositories: SetProperty<String> = project.objects.setProperty<String>()
-        .andFinalizeValueOnRead().andDisallowUnsafeRead()
+        .andFinalizeValueOnRead()
 
     /**
      * Contracts that when building the slimjar, all dependencies must be resolved and there is no ambiguity.
@@ -75,7 +78,7 @@ open class SlimJarExtension @Inject constructor(project: Project) {
     @get:Input
     @get:Optional
     val requirePreResolve: Property<Boolean> = project.objects.property<Boolean>()
-        .convention(false).andFinalizeValueOnRead().andDisallowUnsafeRead()
+        .convention(false).andFinalizeValueOnRead()
 
     /**
      * Contracts that when building the slimjar, all pre-resolved dependencies must have a valid checksum.
@@ -85,7 +88,7 @@ open class SlimJarExtension @Inject constructor(project: Project) {
     @get:Input
     @get:Optional
     val requireChecksum: Property<Boolean> = project.objects.property<Boolean>()
-        .convention(false).andFinalizeValueOnRead().andDisallowUnsafeRead()
+        .convention(false).andFinalizeValueOnRead()
 
     /**
      * @receiver the original path
