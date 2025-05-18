@@ -41,7 +41,7 @@ public final class FlatFileMetaMediatorFactory implements MetaMediatorFactory {
         if (Files.exists(metaPath)) return new FlatFileMetaMediator(metaPath);
 
         try {
-            Files.createFile(metaPath);
+            Files.createDirectories(metaPath);
         } catch (final IOException err) {
             throw new RelocatorException("Failed to create new file.", err);
         }
