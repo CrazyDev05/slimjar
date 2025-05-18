@@ -46,7 +46,7 @@ import java.util.Collections;
 
 public final class ReflectiveGsonFacadeFactory implements GsonFacadeFactory {
     @NotNull private static final String GSON_PACKAGE = "com#google#gson#Gson";
-    @NotNull private static final String GSON_TYPES_PACKAGE = "com#google#gson#internal#$Gson$Types";
+    @NotNull private static final String GSON_TYPES_PACKAGE = "com#google#gson#internal#GsonTypes";
 
     @NotNull private final Constructor<?> gsonConstructor;
     @NotNull private final Method gsonFromJsonMethod;
@@ -116,7 +116,7 @@ public final class ReflectiveGsonFacadeFactory implements GsonFacadeFactory {
         final Dependency gson = new Dependency(
             Packages.fix("com#google#code#gson"),
             "gson",
-            "2.8.6",
+            "2.13.1",
             null,
             Collections.emptyList()
         );
