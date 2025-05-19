@@ -69,7 +69,12 @@ public final class URLDependencyDownloader implements DependencyDownloader {
     public @NotNull Optional<File> download(@NotNull final Dependency dependency) throws DownloaderException {
         final var expectedOutputFile = outputWriterProducer.getStrategy().selectFileFor(dependency);
 
-        if (existingBOM(expectedOutputFile.toPath()) && verifier.verify(expectedOutputFile, dependency)) {
+        if (existingBOM(expectedOutputFile.toPath())) {
+            LOGGER.debug("Skipping download of %s because it is a bom.", dependency);
+            return Optional.empty();
+        }
+
+        if (verifier.verify(expectedOutputFile, dependency)) {
             LOGGER.debug("Skipping download of %s because it is already downloaded.", dependency);
             return Optional.of(expectedOutputFile);
         }
