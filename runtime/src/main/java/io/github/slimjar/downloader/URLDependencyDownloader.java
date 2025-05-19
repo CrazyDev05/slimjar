@@ -28,6 +28,7 @@ import io.github.slimjar.downloader.output.OutputWriterFactory;
 import io.github.slimjar.downloader.verify.DependencyVerifier;
 import io.github.slimjar.exceptions.DownloaderException;
 import io.github.slimjar.logging.LocationAwareProcessLogger;
+import io.github.slimjar.logging.LogDispatcher;
 import io.github.slimjar.logging.ProcessLogger;
 import io.github.slimjar.resolver.DependencyResolver;
 import io.github.slimjar.exceptions.UnresolvedDependencyException;
@@ -81,7 +82,7 @@ public final class URLDependencyDownloader implements DependencyDownloader {
         cleanupExisting(expectedOutputFile, dependency);
 
         final var url = result.dependencyURL();
-        LOGGER.info("Downloading %s...", url);
+        LogDispatcher.getMediatingLogger().info("Downloading %s", url);
 
         final URLConnection connection;
         final InputStream inputStream;
