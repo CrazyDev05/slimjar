@@ -67,18 +67,18 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
     ) throws VerificationException {
         if (!file.exists()) return false;
 
-        LOGGER.info("Verifying checksum for %s", dependency.artifactId());
+        LOGGER.debug("Verifying checksum for %s", dependency);
 
         final var checksumFile = outputWriterFactory.getStrategy().selectFileFor(dependency);
         checksumFile.getParentFile().mkdirs();
 
         if (!checksumFile.exists() && !prepareChecksumFile(checksumFile, dependency)) {
-            LOGGER.debug("Unable to resolve checksum for %s, falling back to fallbackVerifier!", dependency.artifactId());
+            LOGGER.debug("Unable to resolve checksum for %s, falling back to fallbackVerifier!", dependency);
             return fallbackVerifier.verify(file, dependency);
         }
 
         if (checksumFile.length() == 0L) {
-            LOGGER.debug("Required checksum not found for %s, using fallbackVerifier!", dependency.artifactId());
+            LOGGER.debug("Required checksum not found for %s, using fallbackVerifier!", dependency);
             return fallbackVerifier.verify(file, dependency);
         }
 
@@ -90,15 +90,15 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
             throw new VerificationException("Unable to read bytes from checksum file (%s)".formatted(checksumFile), e);
         }
 
-        LOGGER.debug("%s -> Actual checksum: %s;", dependency.artifactId(), actualChecksum);
-        LOGGER.debug("%s -> Expected checksum: %s;", dependency.artifactId(), expectedChecksum);
+        LOGGER.debug("%s -> Actual checksum: %s;", dependency, actualChecksum);
+        LOGGER.debug("%s -> Expected checksum: %s;", dependency, expectedChecksum);
 
         if (!actualChecksum.equals(expectedChecksum)) {
-            LOGGER.error("Checksum mismatch for %s, expected %s, got %s", dependency.artifactId(), expectedChecksum, actualChecksum);
+            LOGGER.error("Checksum mismatch for %s, expected %s, got %s", dependency, expectedChecksum, actualChecksum);
             return false;
         }
 
-        LOGGER.debug("Checksum matched for %s.", dependency.artifactId());
+        LOGGER.debug("Checksum matched for %s.", dependency);
         return true;
     }
 
@@ -120,7 +120,7 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
 
         final var checkSumUrl = result.get().checksumURL();
 
-        LOGGER.info("Resolved checksum URL for %s as %s", dependency.artifactId(), checkSumUrl);
+        LOGGER.debug("Resolved checksum URL for %s as %s", dependency, checkSumUrl);
 
         try {
             if (checkSumUrl == null) {
@@ -138,7 +138,7 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
             throw new VerificationException("Unable to get checksum for %s".formatted(dependency.toString()), err);
         }
 
-        LOGGER.info("Downloaded checksum for %s", dependency.artifactId());
+        LOGGER.debug("Downloaded checksum for %s", dependency);
 
         return true;
     }

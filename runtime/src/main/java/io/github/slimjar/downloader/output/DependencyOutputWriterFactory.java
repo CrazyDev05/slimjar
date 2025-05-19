@@ -43,7 +43,7 @@ public final class DependencyOutputWriterFactory implements OutputWriterFactory 
     @Contract(value = "_ -> new", pure = true)
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public @NotNull OutputWriter create(@NotNull final Dependency dependency) {
-        LOGGER.debug("Creating OutputWriter for %s", dependency.artifactId());
+        LOGGER.debug("Creating OutputWriter for %s", dependency);
 
         final var outputFile = outputFilePathStrategy.selectFileFor(dependency);
         outputFile.getParentFile().mkdirs();

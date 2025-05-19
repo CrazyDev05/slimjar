@@ -52,7 +52,7 @@ public record PingingRepositoryEnquirer(
     @Override
     @Contract(pure = true)
     public @Nullable ResolutionResult enquire(final @NotNull Dependency dependency) {
-        LOGGER.debug("Enquiring repositories to find %s", dependency.artifactId());
+        LOGGER.debug("Enquiring repositories to find %s", dependency);
 
         return dependencyURLCreationStrategy.pathTo(repository, dependency).stream()
             .map(this::createURL)
@@ -78,7 +78,7 @@ public record PingingRepositoryEnquirer(
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return repository.url().toString();
     }
 

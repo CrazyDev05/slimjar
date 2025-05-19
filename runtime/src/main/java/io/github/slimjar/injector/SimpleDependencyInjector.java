@@ -28,6 +28,8 @@ import io.github.slimjar.exceptions.InjectorException;
 import io.github.slimjar.injector.helper.DownloadHelper;
 import io.github.slimjar.injector.helper.DownloadHelperFactory;
 import io.github.slimjar.injector.loader.Injectable;
+import io.github.slimjar.logging.LogDispatcher;
+import io.github.slimjar.logging.ProcessLogger;
 import io.github.slimjar.resolver.ResolutionResult;
 import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.DependencyData;
@@ -40,6 +42,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public final class SimpleDependencyInjector implements DependencyInjector {
+    private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();
     private final DownloadHelperFactory downloadHelperFactory;
 
     public SimpleDependencyInjector(final DownloadHelperFactory downloadHelperFactory) {
@@ -65,6 +68,7 @@ public final class SimpleDependencyInjector implements DependencyInjector {
         Consumer<File> action = file -> {
             try {
                 injectable.inject(file.toURI().toURL());
+                LOGGER.info("Loaded library %s", file.toPath().normalize());
             } catch (final MalformedURLException err) { /* Should never happen */ }
         };
 

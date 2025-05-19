@@ -108,7 +108,7 @@ public final class CachingDependencyResolver implements DependencyResolver {
             .map(Objects::toString)
             .orElse("[FAILED TO RESOLVE]");
 
-        LOGGER.info("Resolved %s @ %s", dependency.artifactId(), resolvedResult);
+        LOGGER.debug("Resolved %s @ %s", dependency, resolvedResult);
         return result.orElse(null);
     }
 }

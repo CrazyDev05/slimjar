@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.Optional;
 
 public final class FolderedFilePathStrategy implements FilePathStrategy {
     @NotNull private static final ProcessLogger LOGGER = LocationAwareProcessLogger.generic();
@@ -47,7 +46,7 @@ public final class FolderedFilePathStrategy implements FilePathStrategy {
     @Override
     @Contract(pure = true)
     public @NotNull File selectFileFor(@NotNull final Dependency dependency) {
-        final var extendedVersion = Optional.ofNullable(dependency.snapshotId()).map(s -> "-" + s).orElse("");
+        final var extendedVersion = dependency.snapshot().map(s -> "-" + s).orElse("");
         final var path = String.format(
             DEPENDENCY_FILE_FORMAT,
             rootDirectory.getPath(),
@@ -56,7 +55,7 @@ public final class FolderedFilePathStrategy implements FilePathStrategy {
             dependency.version() + extendedVersion
         );
 
-        LOGGER.debug("Selected jar file for %s at %s.", dependency.artifactId(), path);
+        LOGGER.debug("Selected jar file for %s at %s.", dependency, path);
         return new File(path);
     }
 

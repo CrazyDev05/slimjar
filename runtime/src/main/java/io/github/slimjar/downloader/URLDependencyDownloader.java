@@ -69,7 +69,7 @@ public final class URLDependencyDownloader implements DependencyDownloader {
         final var expectedOutputFile = outputWriterProducer.getStrategy().selectFileFor(dependency);
 
         if (existingBOM(expectedOutputFile.toPath()) && verifier.verify(expectedOutputFile, dependency)) {
-            LOGGER.debug("Skipping download of %s because it is already downloaded.", dependency.artifactId());
+            LOGGER.debug("Skipping download of %s because it is already downloaded.", dependency);
             return Optional.of(expectedOutputFile);
         }
 
@@ -80,10 +80,8 @@ public final class URLDependencyDownloader implements DependencyDownloader {
         }
         cleanupExisting(expectedOutputFile, dependency);
 
-        LOGGER.info("Downloading %s...", dependency.artifactId());
-
         final var url = result.dependencyURL();
-        LOGGER.debug("Connecting to %s", url);
+        LOGGER.info("Downloading %s...", url);
 
         final URLConnection connection;
         final InputStream inputStream;
@@ -93,17 +91,15 @@ public final class URLDependencyDownloader implements DependencyDownloader {
         } catch (final IOException err) {
             throw new DownloaderException("Failed to connect to " + url, err);
         }
-        LOGGER.debug("Connection successful! Downloading %s", dependency.artifactId() + "...");
+        LOGGER.debug("Connection successful! Downloading %s", dependency + "...");
 
         final var outputWriter = outputWriterProducer.create(dependency);
-        LOGGER.debug("%s.Size = %s", dependency.artifactId(), connection.getContentLength());
+        LOGGER.debug("%s.Size = %s", dependency, connection.getContentLength());
 
         final var downloadResult = outputWriter.writeFrom(inputStream, connection.getContentLength());
         Connections.tryDisconnect(connection);
         verifier.verify(downloadResult, dependency); // TODO: Should we panic here?
-        LOGGER.debug("Artifact %s downloaded successfully!", dependency.artifactId());
-
-        LOGGER.info("Downloaded %s successfully!", dependency.artifactId());
+        LOGGER.debug("Artifact %s downloaded successfully from %s!", dependency, url);
         return Optional.of(downloadResult);
     }
 

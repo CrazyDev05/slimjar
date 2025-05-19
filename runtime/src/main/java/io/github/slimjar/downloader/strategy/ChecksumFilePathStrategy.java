@@ -32,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.Optional;
 
 public final class ChecksumFilePathStrategy implements FilePathStrategy {
     @NotNull private static final ProcessLogger LOGGER = LocationAwareProcessLogger.generic();
@@ -52,7 +51,7 @@ public final class ChecksumFilePathStrategy implements FilePathStrategy {
     @Override
     @Contract(value = "_ -> new", pure = true)
     public @NotNull File selectFileFor(final @NotNull Dependency dependency) {
-        final var extendedVersion = Optional.ofNullable(dependency.snapshotId()).map(s -> "-" + s).orElse("");
+        final var extendedVersion = dependency.snapshot().map(s -> "-" + s).orElse("");
         final var path = DEPENDENCY_FILE_FORMAT.formatted(
             rootDirectory.getPath(),
             dependency.groupId().replace('.','/'),
@@ -61,7 +60,7 @@ public final class ChecksumFilePathStrategy implements FilePathStrategy {
             algorithm
         );
 
-        LOGGER.debug("Selected checksum file for %s at %s", dependency.artifactId(), path);
+        LOGGER.debug("Selected checksum file for %s at %s", dependency, path);
         return new File(path);
     }
 

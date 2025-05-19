@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 public record Dependency(
     @NotNull String groupId,
@@ -40,11 +41,18 @@ public record Dependency(
     @NotNull Collection<Dependency> transitive
 ) implements Comparable<Dependency> {
 
+    public boolean isSnapshot() {
+        return snapshotId != null && !snapshotId.isEmpty();
+    }
+
+    public Optional<String> snapshot() {
+        return isSnapshot() ? Optional.ofNullable(snapshotId) : Optional.empty();
+    }
+
     @Override
     @Contract(pure = true)
     public @NotNull String toString() {
-        final String snapshotId = snapshotId();
-        final String suffix = (snapshotId != null && snapshotId.length() > 0) ? (":" + snapshotId) : "";
+        final String suffix = isSnapshot() ? (":" + snapshotId()) : "";
         return groupId() + ":" + artifactId() + ":" + version() + suffix;
     }
 
