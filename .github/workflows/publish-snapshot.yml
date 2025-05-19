@@ -25,7 +25,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Publish
-        run: ./gradlew publishToMavenCentral
+        run: ./gradlew publishToMavenCentral -Pversion=${{ env.ORG_GRADLE_PROJECT_VERSION_NAME }}
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
