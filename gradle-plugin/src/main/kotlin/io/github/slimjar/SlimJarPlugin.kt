@@ -69,7 +69,7 @@ class SlimJarPlugin : Plugin<Project> {
         // The fuck does this do?
         dependencies.extra.set(
             "slimjar",
-            asGroovyClosure("+", ::slimJarLib)
+            asGroovyClosure(BuildConstants.VERSION, ::slimJarLib)
         )
 
         // Hooks into shadow to inject relocations

@@ -44,6 +44,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 
+import static io.github.slimjar.BuildConstants.GSON;
+
 public final class ReflectiveGsonFacadeFactory implements GsonFacadeFactory {
     @NotNull private static final String GSON_PACKAGE = "com#google#gson#Gson";
     @NotNull private static final String GSON_TYPES_PACKAGE = "com#google#gson#internal#GsonTypes";
@@ -113,13 +115,7 @@ public final class ReflectiveGsonFacadeFactory implements GsonFacadeFactory {
     }
 
     private static DependencyData getGsonDependency(final Collection<Repository> repositories) {
-        final Dependency gson = new Dependency(
-            Packages.fix("com#google#code#gson"),
-            "gson",
-            "2.13.1",
-            null,
-            Collections.emptyList()
-        );
+        final Dependency gson = new Dependency(Packages.fix("com#google#code#gson"), "gson", GSON, null, Collections.emptyList());
         return new DependencyData(
             Collections.emptySet(),
             repositories,

@@ -3,6 +3,10 @@ kotlin = "2.1.20"
 kotlin-coroutines = "1.9.0"
 shadow = "8.3.6"
 
+gson = "2.13.1"
+jar-relocator = "1.7"
+asm = "9.8"
+
 jupiter = "5.12.2"
 mockito = "5.17.0"
 
@@ -15,9 +19,9 @@ kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", 
 gradle-shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 gradle-kotlin-jvm = { module = "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin", version.ref = "kotlin" }
 
-jar-relocator = "me.lucko:jar-relocator:1.7"
+jar-relocator = { module = "me.lucko:jar-relocator", version.ref = "jar-relocator" }
 annotations = "org.jetbrains:annotations:24.0.0"
-gson = "com.google.code.gson:gson:2.13.1"
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -49,6 +49,9 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.github.slimjar.BuildConstants.ASM;
+import static io.github.slimjar.BuildConstants.JAR_RELOCATOR;
+
 public final class ReflectiveJarRelocatorFacadeFactory implements JarRelocatorFacadeFactory {
     @NotNull private static final String JAR_RELOCATOR_PACKAGE = "me#lucko#jarrelocator#JarRelocator";
     @NotNull private static final String RELOCATION_PACKAGE = "me#lucko#jarrelocator#Relocation";
@@ -113,33 +116,10 @@ public final class ReflectiveJarRelocatorFacadeFactory implements JarRelocatorFa
     }
 
     private static DependencyData getJarRelocatorDependency(final Collection<Repository> repositories) {
-        final Dependency asm = new Dependency(
-            Packages.fix("org#ow2#asm"),
-            "asm",
-            "9.8",
-            null,
-            Collections.emptyList()
-        );
-        final Dependency asmCommons = new Dependency(
-            Packages.fix("org#ow2#asm"),
-            "asm-commons",
-            "9.8",
-            null,
-            Collections.emptyList()
-        );
-        final Dependency jarRelocator = new Dependency(
-            Packages.fix("me#lucko"),
-            "jar-relocator",
-            "1.7",
-            null,
-            Arrays.asList(asm, asmCommons)
-        );
-        return new DependencyData(
-            Collections.emptySet(),
-            repositories,
-            Collections.singleton(jarRelocator),
-            Collections.emptyList()
-        );
+        final Dependency asm = new Dependency(Packages.fix("org#ow2#asm"), "asm", ASM, null, Collections.emptyList());
+        final Dependency asmCommons = new Dependency(Packages.fix("org#ow2#asm"), "asm-commons", ASM, null, Collections.emptyList());
+        final Dependency jarRelocator = new Dependency(Packages.fix("me#lucko"), "jar-relocator", JAR_RELOCATOR, null, Arrays.asList(asm, asmCommons));
+        return new DependencyData(Collections.emptySet(), repositories, Collections.singleton(jarRelocator), Collections.emptyList());
     }
 
     public static JarRelocatorFacadeFactory create(
