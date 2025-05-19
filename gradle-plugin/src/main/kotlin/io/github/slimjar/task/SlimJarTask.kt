@@ -104,14 +104,14 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     /** Finds jars to be isolated and adds them to the final jar. */
     @TaskAction
     internal fun includeIsolatedJars() = with(project) {
+        val indexes = mutableMapOf<String, Int>()
         slimJarExtension.isolatedProjects.get()
-            .filter { it != this }
+            .filter { it.key != this }
+            .toList()
+            .sortedBy { it.second.canonicalPath }
             .forEach {
-                it.tasks.targetedJarTask.apply {
-                    val archive = outputs.files.singleFile
-                    val output = outputDirectory.resolve("${it.name}.isolated-jar")
-                    archive.copyTo(output, true)
-                }
+                val path = it.first.normalPath
+                it.second.copyTo(outputDirectory.resolve("$path.${indexes.compute(path) { _, i -> i ?: -1}}.isolated-jar"), true)
             }
     }
 

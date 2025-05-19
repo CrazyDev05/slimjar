@@ -39,5 +39,6 @@ internal val TaskContainer.targetedJarTask: Task get() {
 
 internal val Project.slimResources get() = layout.buildDirectory.dir("resources/slimjar").get().asFile.also(File::mkdirs)
 internal val Project.slimExtension: SlimJarExtension get() = extensions.getByType()
+internal val Project.normalPath: String get() = path.replace(Regex("[^a-zA-Z0-9\\s]"), "_")
 
 internal fun <T : HasConfigurableValue> T.andFinalizeValueOnRead(): T = apply { finalizeValueOnRead() }

@@ -32,19 +32,23 @@ import io.github.slimjar.resolver.data.Mirror
 import io.github.slimjar.task.SlimJarTask
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.withType
+import java.io.File
 import javax.inject.Inject
 
 open class SlimJarExtension @Inject constructor(private val project: Project) {
     @get:Input
     @get:Optional
-    val isolatedProjects: SetProperty<Project> = project.objects.setProperty<Project>()
+    val isolatedProjects: MapProperty<Project, File> = project.objects.mapProperty<Project, File>()
         .andFinalizeValueOnRead()
 
     @get:Input
@@ -103,7 +107,13 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
     }
 
     fun isolate(target: Project) {
-        isolatedProjects.add(target)
+        val task = target.tasks.targetedJarTask
+        isolate(target, task, task.outputs.files.singleFile)
+    }
+
+    fun isolate(target: Project, targetTask: Task, targetFile: File) {
+        assert(target == targetTask.project) { "Target project and task must be the same" }
+        isolatedProjects.put(target, targetFile)
 
         if (target.slimInjectToIsolated) {
             target.pluginManager.apply(ShadowPlugin::class.java)
@@ -111,7 +121,8 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
         }
 
         project.tasks.withType<SlimJarTask> {
-            dependsOn(target.tasks.targetedJarTask)
+            dependsOn(targetTask)
+            inputs.files(targetTask, targetFile)
         }
     }
 
