@@ -102,15 +102,63 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
         addRelocation(this, target)
     }
 
+    /**
+     * Relocates the specified original path to the given target path.
+     *
+     * @param original the original path to relocate.
+     * @param target the target path to relocate to.
+     */
     fun relocate(original: String, target: String) {
         addRelocation(original, target)
     }
 
-    fun isolate(target: Project) {
-        val task = target.tasks.targetedJarTask
-        isolate(target, task, task.outputs.files.singleFile)
+    /**
+     * Relocates a specified original path to the given target path with additional configuration.
+     *
+     * @param original the original path to be relocated.
+     * @param target the target path to relocate to.
+     * @param configure an action used to customize the relocation configuration.
+     */
+    fun relocate(original: String, target: String, configure: Action<RelocationConfig>) {
+        addRelocation(original, target, configure)
     }
 
+    /**
+     * Isolates the specified project by using the output of the shadowJar or jar task.
+     *
+     * @param target the project to be isolated.
+     */
+    fun isolate(target: Project) =
+        isolate(target, target.tasks.targetedJarTask)
+
+    /**
+     * Isolates the specified project by using the output file of the targetTask.
+     *
+     * @param target the project to be isolated.
+     * @param targetTask the task within the specified project to isolate.
+     */
+    fun isolate(target: Project, targetTask: Task) =
+        isolate(target, targetTask, targetTask.outputs.files.singleFile)
+
+    /**
+     * Isolates the specified project by using the output of its shadowJar or jar task,
+     * and associates it with the provided target file.
+     *
+     * @param target the project to be isolated.
+     * @param targetFile the file to associate with the isolated project.
+     */
+    fun isolate(target: Project, targetFile: File) =
+        isolate(target, target.tasks.targetedJarTask, targetFile)
+
+    /**
+     * Isolates a specified project by associating it with a target task and a target file.
+     * This method ensures that the target project and task are aligned, applies necessary plugins if required,
+     * and configures task dependencies and inputs.
+     *
+     * @param target the project to be isolated.
+     * @param targetTask the task within the project to isolate.
+     * @param targetFile the file to associate with the isolated project.
+     */
     fun isolate(target: Project, targetTask: Task, targetFile: File) {
         assert(target == targetTask.project) { "Target project and task must be the same" }
         isolatedProjects.put(target, targetFile)
