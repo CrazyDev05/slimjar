@@ -55,6 +55,6 @@ jobs:
 
   snapshot:
     needs: test
-    if: github.ref == 'refs/heads/2.x.x' && github.repository == 'CrazyDev05/slimjar'
+    if: github.ref == 'refs/heads/2.x.x' && github.repository == 'CrazyDev05/slimjar' && false
     uses: ./.github/workflows/publish-snapshot.yml
     secrets: inherit
