@@ -105,21 +105,27 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     @TaskAction
     internal fun includeIsolatedJars() = with(project) {
         val indexes = mutableMapOf<String, Int>()
+        outputDirectory.listFiles { it.extension == "isolated-jar" }
+            ?.forEach(File::delete)
+
         slimJarExtension.isolatedProjects.get()
             .filter { it.key != this }
             .toList()
             .sortedBy { it.second.canonicalPath }
             .forEach {
                 val path = it.first.normalPath
-                it.second.copyTo(outputDirectory.resolve("$path.${indexes.compute(path) { _, i -> i ?: -1}}.isolated-jar"), true)
+                it.second.copyTo(outputDirectory.resolve("$path.${indexes.compute(path) { _, i -> (i ?: -1) + 1}}.isolated-jar"))
             }
     }
 
     @TaskAction
     internal fun generateResolvedDependenciesFile() = with(project) {
-        if (!project.performCompileTimeResolution) return@with
-
         val file = outputDirectory.resolve("slimjar-resolutions.json")
+        if (!project.performCompileTimeResolution) {
+            file.delete()
+            return@with
+        }
+
         val preResolved: Map<String, ResolutionResult> = if (file.exists()) {
             file.reader().use { reader ->
                 GSON.fromJson(
@@ -238,14 +244,15 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
      * snapshot is the only nullable value.
      */
     private fun String.toDependency(transitive: Collection<Dependency>): Dependency? {
-        val array = arrayOfNulls<Any>(5)
-        array[4] = transitive.toList()
-
-        split(":").takeIf { it.size >= 3 }?.forEachIndexed { index, s ->
-            array[index] = s
-        } ?: return null
-
-        return Dependency::class.java.constructors.first().newInstance(*array) as Dependency
+        val split = split(":")
+        if (split.size < 3) return null
+        return Dependency(
+            split[0],
+            split[1],
+            split[2],
+            if (split.size > 3) split[3] else null,
+            transitive
+        )
     }
 
     private fun RepositoryHandler.getMavenRepos() = filterIsInstance<MavenArtifactRepository>()
