@@ -51,8 +51,15 @@ public final class InjectableFactory {
         @NotNull ClassLoader classLoader
     ) throws InjectorException {
         while (classLoader != null) {
-            if (classLoader instanceof Injectable injectable) return injectable;
-            if (classLoader instanceof URLClassLoader urlClassLoader) return new WrappedInjectableClassLoader(urlClassLoader);
+            if (classLoader instanceof Injectable injectable) {
+                return injectable;
+            }
+
+            try {
+                if (classLoader instanceof URLClassLoader urlClassLoader)
+                    return new WrappedInjectableClassLoader(urlClassLoader);
+            } catch (Throwable ignored) {}
+
             try {
                 return UnsafeInjectable.create(classLoader);
             } catch (Throwable ignored) {}

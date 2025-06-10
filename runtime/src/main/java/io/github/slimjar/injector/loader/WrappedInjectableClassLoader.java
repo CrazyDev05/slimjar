@@ -36,18 +36,14 @@ public final class WrappedInjectableClassLoader implements Injectable {
     @NotNull private final URLClassLoader urlClassLoader;
     @NotNull private final Method addURLMethod;
 
-    public WrappedInjectableClassLoader(@NotNull final URLClassLoader urlClassLoader) throws InjectorException {
+    public WrappedInjectableClassLoader(@NotNull final URLClassLoader urlClassLoader) throws ReflectiveOperationException {
         this.urlClassLoader = urlClassLoader;
-        try {
-            this.addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-        } catch (final NoSuchMethodException err) {
-            throw new InjectorException("Unable to find addURL method", err);
-        }
+        this.addURLMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+        addURLMethod.setAccessible(true);
     }
 
     @Override
     public void inject(@NotNull final URL url) throws InjectorException {
-        addURLMethod.setAccessible(true);
         try {
             addURLMethod.invoke(urlClassLoader, url);
         } catch (IllegalAccessException | InvocationTargetException e) {
