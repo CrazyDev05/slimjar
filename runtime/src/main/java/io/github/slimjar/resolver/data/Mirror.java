@@ -28,13 +28,17 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Objects;
 
 public record Mirror(
     @NotNull URL mirroring,
     @NotNull URL original
-) {
+) implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Override
     @Contract(pure = true)
@@ -46,10 +50,10 @@ public record Mirror(
     @Contract(value = "null -> false", pure = true)
     public boolean equals(@Nullable final Object o) {
         if (this == o) return true;
-        if (!(o instanceof Mirror mirror)) return false;
+        if (!(o instanceof Mirror(URL mirroring1, URL original1))) return false;
 
-        return Objects.equals(mirroring, mirror.mirroring)
-            && Objects.equals(original, mirror.original);
+        return Objects.equals(mirroring, mirroring1)
+            && Objects.equals(original, original1);
     }
 
 }

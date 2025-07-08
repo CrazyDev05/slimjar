@@ -27,6 +27,8 @@ package io.github.slimjar.relocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -36,7 +38,9 @@ public record RelocationRule(
     @NotNull String relocatedPackagePattern,
     @NotNull Collection<String> exclusions,
     @NotNull Collection<String> inclusions
-) {
+) implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public RelocationRule(
         @NotNull final String original,
@@ -59,7 +63,7 @@ public record RelocationRule(
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "RelocationRule{" +
             "originalPackagePattern='" + originalPackagePattern + '\'' +
             ", relocatedPackagePattern='" + relocatedPackagePattern + '\'' +

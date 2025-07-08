@@ -57,7 +57,6 @@ import org.gradle.api.tasks.diagnostics.internal.graph.nodes.RenderableModuleRes
 import org.gradle.kotlin.dsl.setProperty
 import java.io.File
 import java.net.URI
-import java.net.URL
 import javax.inject.Inject
 
 @CacheableTask
@@ -73,6 +72,30 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         .convention(arrayOf(SLIM_CONFIGURATION_NAME, SLIM_API_CONFIGURATION_NAME).mapNotNull { project.configurations.findByName(it) })
         .andFinalizeValueOnRead()
 
+    @get:Input
+    @get:Optional
+    val isolatedProjects = slimJarExtension.isolatedProjects
+
+    @get:Input
+    @get:Optional
+    val relocations = slimJarExtension.relocations
+
+    @get:Input
+    @get:Optional
+    val mirrors = slimJarExtension.mirrors
+
+    @get:Input
+    @get:Optional
+    val globalRepositories = slimJarExtension.globalRepositories
+
+    @get:Input
+    @get:Optional
+    val requirePreResolve = slimJarExtension.requirePreResolve
+
+    @get:Input
+    @get:Optional
+    val requireChecksum = slimJarExtension.requireChecksum
+
     init {
         group = "slimJar"
         inputs.files(slimjarConfigurations)
@@ -87,14 +110,14 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     @TaskAction
     internal fun createJson() = with(project) {
         val dependencies = slimjarConfigurations.get().flatMap { it.incoming.getSlimDependencies() }
-        val repositories = slimJarExtension.globalRepositories.get()
+        val repositories = globalRepositories.get()
             .map { Repository(URI.create(it).toURL()) }
             .ifEmpty { repositories.getMavenRepos() }
         val dependencyData = DependencyData(
-            slimJarExtension.mirrors.get(),
+            mirrors.get(),
             repositories,
             dependencies,
-            slimJarExtension.relocations.get()
+            relocations.get()
         )
         outputDirectory.resolve("slimjar.json")
             .writer()
@@ -108,7 +131,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         outputDirectory.listFiles { it.extension == "isolated-jar" }
             ?.forEach(File::delete)
 
-        slimJarExtension.isolatedProjects.get()
+        isolatedProjects.get()
             .filter { it.key != this }
             .toList()
             .sortedBy { it.second.canonicalPath }
@@ -157,7 +180,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         val mirrorSelector = SimpleMirrorSelector()
         val resolver = CachingDependencyResolver(
             urlPinger,
-            mirrorSelector.select(repositories, slimJarExtension.mirrors.get()),
+            mirrorSelector.select(repositories, mirrors.get()),
             enquirerFactory,
             mapOf()
         )
@@ -165,8 +188,8 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         val results = mutableMapOf<String, ResolutionResult>()
         // TODO: Cleanup this mess
         runBlocking(IO) {
-            val globalRepositoryEnquirer = slimJarExtension.globalRepositories.map { repos ->
-                repos.map { repoString -> enquirerFactory.create(Repository(URL(repoString))) }
+            val globalRepositoryEnquirer = globalRepositories.map { repos ->
+                repos.map { repoString -> enquirerFactory.create(Repository(URI.create(repoString).toURL())) }
             }
 
             dependencies.asFlow()
@@ -185,7 +208,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
                     if (!result.isEmpty) return@filter true
 
                     logger.warn("Failed to resolve dependency $dep")
-                    if (slimJarExtension.requirePreResolve.get()) {
+                    if (requirePreResolve.get()) {
                         error(
                             """
                             Failed to resolve dependency $dep during pre-resolve.
@@ -197,7 +220,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
 
                     false
                 }.map { (dep, result) -> dep to result.get() }.onEach { (dep, result) ->
-                    if (!slimJarExtension.requireChecksum.get() || result.checksumURL() != null) return@onEach
+                    if (!requireChecksum.get() || result.checksumURL() != null) return@onEach
                     logger.warn("Failed to resolve checksum for dependency $dep")
                     error(
                         """
