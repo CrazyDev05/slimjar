@@ -50,10 +50,10 @@ public record Mirror(
     @Contract(value = "null -> false", pure = true)
     public boolean equals(@Nullable final Object o) {
         if (this == o) return true;
-        if (!(o instanceof Mirror(URL mirroring1, URL original1))) return false;
+        if (!(o instanceof Mirror mirror)) return false;
 
-        return Objects.equals(mirroring, mirroring1)
-            && Objects.equals(original, original1);
+        return Objects.equals(mirroring, mirror.mirroring)
+                && Objects.equals(original, mirror.original);
     }
 
 }
