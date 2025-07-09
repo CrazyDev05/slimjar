@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.1.20"
 kotlin-coroutines = "1.9.0"
-shadow = "8.3.6"
+shadow = "9.0.0-rc1"
 
 gson = "2.13.1"
 jar-relocator = "1.7"
