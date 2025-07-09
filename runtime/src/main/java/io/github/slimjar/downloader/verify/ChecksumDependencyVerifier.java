@@ -83,9 +83,11 @@ public final class ChecksumDependencyVerifier implements DependencyVerifier {
         }
 
         final var actualChecksum = checksumCalculator.calculate(file);
-        final String expectedChecksum;
+        String expectedChecksum;
         try {
             expectedChecksum = new String(Files.readAllBytes(checksumFile.toPath())).trim();
+            int index = expectedChecksum.indexOf(' ');
+            if (index != -1) expectedChecksum = expectedChecksum.substring(0, index);
         } catch (IOException e) {
             throw new VerificationException("Unable to read bytes from checksum file (%s)".formatted(checksumFile), e);
         }
