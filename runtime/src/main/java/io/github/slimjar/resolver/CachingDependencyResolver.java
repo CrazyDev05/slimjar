@@ -36,19 +36,13 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.*;
 
 public final class CachingDependencyResolver implements DependencyResolver {
     @NotNull private static final ProcessLogger LOGGER = LogDispatcher.getMediatingLogger();
     @NotNull private final URLPinger urlPinger;
-    @NotNull private final Collection<@NotNull RepositoryEnquirer> repositories;
+    @NotNull private final List<@NotNull RepositoryEnquirer> repositories;
     @NotNull private final Map<Dependency, ResolutionResult> cachedResults = new ConcurrentHashMap<>();
     @NotNull private final Map<String, ResolutionResult> preResolvedResults;
 
@@ -62,8 +56,9 @@ public final class CachingDependencyResolver implements DependencyResolver {
         this.urlPinger = urlPinger;
         this.preResolvedResults = new ConcurrentHashMap<>(preResolvedResults);
         this.repositories = repositories.stream()
-            .map(enquirerFactory::create)
-            .collect(Collectors.toSet());
+                .map(enquirerFactory::create)
+                .distinct()
+                .toList();
     }
 
     @Override
@@ -100,15 +95,16 @@ public final class CachingDependencyResolver implements DependencyResolver {
         }
 
         final var usedRepositories = enforcedRepositories.isEmpty() ? repositories : enforcedRepositories;
-        final var result = usedRepositories.stream().parallel()
-            .map(repositoryEnquirer -> repositoryEnquirer.enquire(dependency))
-            .filter(Objects::nonNull)
-            .findFirst();
-        final var resolvedResult = result.map(ResolutionResult::dependencyURL)
-            .map(Objects::toString)
-            .orElse("[FAILED TO RESOLVE]");
-
-        LOGGER.debug("Resolved %s @ %s", dependency, resolvedResult);
-        return result.orElse(null);
+        final var futures = usedRepositories.stream()
+                .map(enquirer -> ForkJoinTask.adapt(() -> enquirer.enquire(dependency)).fork())
+                .toList();
+        for (final var future : futures) {
+            final ResolutionResult result = future.join();
+            if (result == null) continue;
+            LOGGER.debug("Resolved %s @ %s", dependency, result.dependencyURL());
+            return result;
+        }
+        LOGGER.debug("Resolved %s @ [FAILED TO RESOLVE]", dependency);
+        return null;
     }
 }
