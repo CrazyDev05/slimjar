@@ -32,8 +32,12 @@ subprojects {
     }
 
     dependencies {
-        testImplementation(rootProject.libs.jupiter.api)
-        testRuntimeOnly(rootProject.libs.jupiter.engine)
+        testImplementation(rootProject.libs.jupiter)
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    }
+
+    tasks.test {
+        useJUnitPlatform()
     }
 
     extensions.findByType<MavenPublishBaseExtension>()?.apply {

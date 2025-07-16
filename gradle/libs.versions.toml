@@ -11,8 +11,7 @@ jupiter = "5.12.2"
 mockito = "5.17.0"
 
 [libraries]
-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter" }
-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter" }
+jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }

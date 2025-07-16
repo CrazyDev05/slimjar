@@ -24,6 +24,7 @@
 
 package io.github.slimjar.resolver.reader.provider;
 
+import io.github.slimjar.exceptions.ResolutionException;
 import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.resolver.reader.MockDependencyData;
@@ -88,7 +89,7 @@ public class URLDependencyDataProviderTest {
         final var mockURL = Mockito.mock(URL.class);
         final var mockReader = Mockito.mock(DependencyReader.class);
         final var mockConnection = Mockito.mock(URLConnection.class);
-        final Exception expectedException = new IOException();
+        final Exception expectedException = new ResolutionException("Unable to read dependency data.");
 
         Mockito.when(mockURL.openConnection()).thenReturn(mockConnection);
         Mockito.when(mockConnection.getInputStream()).thenThrow(expectedException);

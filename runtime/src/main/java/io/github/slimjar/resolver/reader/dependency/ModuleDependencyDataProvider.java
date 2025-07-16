@@ -34,11 +34,19 @@ import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Objects;
 
-public record ModuleDependencyDataProvider(
-    @NotNull DependencyReader dependencyReader,
-    @NotNull URL moduleUrl
-) implements DependencyDataProvider {
+public final class ModuleDependencyDataProvider implements DependencyDataProvider {
+    private final @NotNull DependencyReader dependencyReader;
+    private final @NotNull URL moduleUrl;
+
+    public ModuleDependencyDataProvider(
+            @NotNull DependencyReader dependencyReader,
+            @NotNull URL moduleUrl
+    ) {
+        this.dependencyReader = dependencyReader;
+        this.moduleUrl = moduleUrl;
+    }
 
     @Override
     public @NotNull DependencyData get() {
@@ -54,10 +62,10 @@ public record ModuleDependencyDataProvider(
             final var dependencyFileEntry = jarFile.getEntry("slimjar.json");
             if (dependencyFileEntry == null) {
                 return new DependencyData(
-                    Collections.emptySet(),
-                    Collections.emptySet(),
-                    Collections.emptySet(),
-                    Collections.emptySet()
+                        Collections.emptySet(),
+                        Collections.emptySet(),
+                        Collections.emptySet(),
+                        Collections.emptySet()
                 );
             }
 
@@ -76,4 +84,34 @@ public record ModuleDependencyDataProvider(
     public @NotNull URL getURL() throws MalformedURLException {
         return new URL("jar:file:" + moduleUrl.getFile() + "!/slimjar.json");
     }
+
+    public @NotNull DependencyReader dependencyReader() {
+        return dependencyReader;
+    }
+
+    public @NotNull URL moduleUrl() {
+        return moduleUrl;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (ModuleDependencyDataProvider) obj;
+        return Objects.equals(this.dependencyReader, that.dependencyReader) &&
+                Objects.equals(this.moduleUrl, that.moduleUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dependencyReader, moduleUrl);
+    }
+
+    @Override
+    public String toString() {
+        return "ModuleDependencyDataProvider[" +
+                "dependencyReader=" + dependencyReader + ", " +
+                "moduleUrl=" + moduleUrl + ']';
+    }
+
 }

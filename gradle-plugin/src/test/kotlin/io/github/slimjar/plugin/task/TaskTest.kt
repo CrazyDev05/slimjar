@@ -26,10 +26,9 @@ package io.github.slimjar.plugin.task
 
 import io.github.slimjar.plugin.applyPlugins
 import org.assertj.core.api.Assertions.assertThatCode
-import org.gradle.kotlin.dsl.* // ktlint-disable no-wildcard-imports
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import kotlin.test.Test
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TaskTest {

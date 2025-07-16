@@ -1,3 +1,5 @@
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
     compileOnly(libs.annotations)
     
@@ -5,6 +7,7 @@ dependencies {
     testImplementation(libs.jar.relocator)
     testImplementation(libs.gson)
     testImplementation(libs.mockito.core)
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
 
 val templateSource = layout.projectDirectory.dir("src/main/templates")
@@ -27,6 +30,10 @@ tasks {
 
     compileJava {
         doFirst { generateTemplates() }
+    }
+
+    test {
+        jvmArgs("-javaagent:${mockitoAgent.asPath}")
     }
 }
 

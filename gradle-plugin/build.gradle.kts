@@ -27,6 +27,7 @@ dependencies {
     compileAndTest(libs.gradle.shadow)
     compileAndTest(libs.gradle.kotlin.jvm)
 
+    testImplementation(kotlin("test"))
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation(gradleTestKit())
 
