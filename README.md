@@ -19,11 +19,11 @@
 
 <h4>What is SlimJar?</h4>
 
-SlimJar allows you to download and load up dependencies at runtime as an alternative to shading your dependencies. This helps you reduce build output size and share downloaded dependencies between projects at client side. It is built mainly with the gradle eco-system in mind and is easily configurable being an almost a drop-in replacement/add-on to gradle projects.
+SlimJar allows you to download and load up dependencies at runtime as an alternative to shading your dependencies. This helps you reduce the build output size and share downloaded dependencies between projects at client side. It is built mainly with the Gradle ecosystem in mind and is easily configurable, being an almost a drop-in replacement/add-on to Gradle projects.
 
 <h4>Why use SlimJar?</h4>
 
-SlimJar makes the process of switching out jars easier by providing jars that are much lesser in size, all "slimmed" dependencies are already available and do not need to be explicitly moved back to your working directory during an update or change. This can be extremely useful for users who have lower bandwidth connections to push large updates to production or testing environments. It also provides vital features such as package relocation, module isolation, auto configuration generation...etc with the simplicity of minor tweaks in your build file.
+SlimJar makes the process of switching out jars easier by providing jars that are much smaller in size, all "slimmed" dependencies are already available and do not need to be explicitly moved back to your working directory during an update or change. This can be extremely useful for users who have lower bandwidth connections to push large updates to production or testing environments. It also provides vital features such as package relocation, module isolation, autoconfiguration generation, etc... with the simplicity of minor tweaks in your build file.
 
 <hr>
 
@@ -73,7 +73,7 @@ cd slimjar && ./gradlew test
 * https://plugins.gradle.org/plugin/de.crazydev22.slimjar
 * https://central.sonatype.com/artifact/de.crazydev22.slimjar/runtime
 
-Distributed under the MIT licence. See ``LICENSE`` for more information.
+Distributed under the MIT license. See ``LICENSE`` for more information.
 
 <br>
 <br>

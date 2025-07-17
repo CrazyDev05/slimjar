@@ -106,7 +106,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
     }
 
-    /** Action to generate the json file inside the jar */
+    /** Action to generate the JSON file inside the jar */
     @TaskAction
     internal fun createJson() = with(project) {
         val dependencies = slimjarConfigurations.get().flatMap { it.incoming.getSlimDependencies() }

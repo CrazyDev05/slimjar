@@ -29,6 +29,7 @@ import io.github.slimjar.resolver.reader.facade.GsonFacade;
 import io.github.slimjar.resolver.reader.facade.GsonFacadeFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 
@@ -43,7 +44,8 @@ public record GsonPreResolutionDataProviderFactory(
 
     @Override
     @Contract(pure = true)
-    public @NotNull PreResolutionDataProvider create(@NotNull final URL resolutionFileURL) {
+    public @NotNull PreResolutionDataProvider create(@Nullable final URL resolutionFileURL) {
+        if (resolutionFileURL == null) return new EmptyPreResolutionDataProvider();
         final var resolutionDataReader = new GsonPreResolutionDataReader(gsonFacade);
         return new GsonPreResolutionDataProvider(resolutionDataReader, resolutionFileURL);
     }

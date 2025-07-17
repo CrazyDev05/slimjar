@@ -62,8 +62,8 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
         .andFinalizeValueOnRead()
 
     /**
-     * Sets a global repositories that will be used to resolve dependencies,
-     * If not set each dependency will attempt to resolve from one of the projects repositories.
+     * Sets global repositories that will be used to resolve dependencies,
+     * If not set, each dependency will attempt to resolve from one of the projects' repositories.
      *
      * When set the global repositories will be the only used repositories.
      */
@@ -141,7 +141,7 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
         isolate(target, targetTask, targetTask.outputs.files.singleFile)
 
     /**
-     * Isolates the specified project by using the output of its shadowJar or jar task,
+     * Isolates the specified project by using the output of its shadowJar or jar task
      * and associates it with the provided target file.
      *
      * @param target the project to be isolated.
@@ -152,7 +152,7 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
 
     /**
      * Isolates a specified project by associating it with a target task and a target file.
-     * This method ensures that the target project and task are aligned, applies necessary plugins if required,
+     * This method ensures that the target project and task are aligned, applies the necessary plugins if required,
      * and configures task dependencies and inputs.
      *
      * @param target the project to be isolated.

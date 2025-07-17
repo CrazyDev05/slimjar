@@ -41,7 +41,7 @@ public record Repository(@NotNull URL url) {
             try {
                 centralInstance = new Repository(new URL(CENTRAL_URL));
             } catch (final MalformedURLException ignored) {
-                // This shouldn't ever happen, just caught to make compiler happy.
+                // This shouldn't ever happen, just caught to make the compiler happy.
             }
         }
 

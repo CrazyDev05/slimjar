@@ -52,19 +52,13 @@ public final class ChanneledFileOutputWriter implements OutputWriter {
     ) throws OutputWriterException {
         LOGGER.debug("Attempting to write from inputStream...");
 
-        try {
+        try (inputStream) {
             if (outputFile.exists()) return outputFile;
 
             LOGGER.debug("Writing %s bytes...", length == -1 ? "unknown" : length);
             Files.copy(inputStream, outputFile.toPath());
         } catch (final Exception err) {
             throw new OutputWriterException("Unable to copy from input stream to %s.".formatted(outputFile), err);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException err) {
-                LOGGER.error("Unable to close stream.", err);
-            }
         }
 
         return outputFile;

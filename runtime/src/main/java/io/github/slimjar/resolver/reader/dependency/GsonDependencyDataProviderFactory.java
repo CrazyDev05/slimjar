@@ -43,7 +43,8 @@ public final class GsonDependencyDataProviderFactory implements DependencyDataPr
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public @NotNull DependencyDataProvider create(@NotNull final URL dependencyFileURL) {
+    public @NotNull DependencyDataProvider create(@Nullable final URL dependencyFileURL) {
+        if (dependencyFileURL == null) return new EmptyDependencyDataProvider();
         final var dependencyReader = new GsonDependencyReader(gsonFacade);
         return new URLDependencyDataProvider(dependencyReader, dependencyFileURL);
     }

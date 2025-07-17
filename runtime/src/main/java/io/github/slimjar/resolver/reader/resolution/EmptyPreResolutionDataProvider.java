@@ -22,30 +22,16 @@
  * SOFTWARE.
  */
 
-package io.github.slimjar.resolver.reader.dependency;
+package io.github.slimjar.resolver.reader.resolution;
 
-import io.github.slimjar.exceptions.ResolutionException;
-import io.github.slimjar.resolver.reader.facade.GsonFacade;
-import io.github.slimjar.resolver.reader.facade.GsonFacadeFactory;
-import org.jetbrains.annotations.Contract;
+import io.github.slimjar.resolver.ResolutionResult;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.net.URL;
+import java.util.Map;
 
-public final class ExternalDependencyDataProviderFactory implements DependencyDataProviderFactory {
-    @NotNull private final GsonFacade gsonFacade;
-
-    @Contract(pure = true)
-    public ExternalDependencyDataProviderFactory(@NotNull final GsonFacadeFactory gsonFactory) throws ResolutionException {
-        this.gsonFacade = gsonFactory.fromFactory();
-    }
-
+public final class EmptyPreResolutionDataProvider implements PreResolutionDataProvider {
     @Override
-    @Contract(value = "_ -> new", pure = true)
-    public @NotNull DependencyDataProvider create(@Nullable final URL dependencyFileURL) {
-        if (dependencyFileURL == null) return new EmptyDependencyDataProvider();
-        final var dependencyReader = new GsonDependencyReader(gsonFacade);
-        return new ModuleDependencyDataProvider(dependencyReader, dependencyFileURL);
+    public @NotNull Map<String, ResolutionResult> get() {
+        return Map.of();
     }
 }

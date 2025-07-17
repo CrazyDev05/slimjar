@@ -49,7 +49,7 @@ public final class FileChecksumCalculator implements ChecksumCalculator {
         try {
             templateDigest = MessageDigest.getInstance(algorithm);
         } catch (final NoSuchAlgorithmException e) {
-            // This should never happen, as the algorithm isn't proved by the user.
+            // This should never happen, as the user doesn't prove the algorithm.
             throw new VerificationException("Failed to initialize checksum calculator", e);
         }
 
@@ -68,7 +68,7 @@ public final class FileChecksumCalculator implements ChecksumCalculator {
     public @NotNull String calculate(@NotNull final File file) throws VerificationException {
         LOGGER.debug("Calculating hash for %s", file.getPath());
 
-        // This helps run IDE environment as a special case
+        // This helps run the IDE environment as a special case
         if (file.isDirectory()) {
             return DIRECTORY_HASH;
         }

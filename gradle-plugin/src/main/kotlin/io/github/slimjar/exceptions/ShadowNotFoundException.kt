@@ -24,4 +24,4 @@
 
 package io.github.slimjar.exceptions
 
-public class ShadowNotFoundException(message: String) : RuntimeException(message)
+class ShadowNotFoundException(message: String) : RuntimeException(message)

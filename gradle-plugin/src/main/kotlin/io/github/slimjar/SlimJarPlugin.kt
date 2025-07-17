@@ -86,7 +86,7 @@ class SlimJarPlugin : Plugin<Project> {
             mustRunAfter(slimJar)
         }
 
-        // Runs the task once resources are being processed to save the json file
+        // Runs the task once resources are being processed to save the JSON file
         tasks.findByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)?.finalizedBy(slimJar)
     }
 

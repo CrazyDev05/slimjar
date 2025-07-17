@@ -66,7 +66,7 @@ public final class IsolatedInjectableClassLoader extends InjectableClassLoader {
         @NotNull String name,
         boolean resolve
     ) throws ClassNotFoundException {
-        // Check if class was already loaded
+        // Check if a class was already loaded
         final var loaded = findLoadedClass(name);
         if (loaded != null) {
             return loaded;

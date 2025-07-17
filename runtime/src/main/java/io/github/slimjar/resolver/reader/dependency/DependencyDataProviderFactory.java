@@ -25,10 +25,11 @@
 package io.github.slimjar.resolver.reader.dependency;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 
 @FunctionalInterface
 public interface DependencyDataProviderFactory {
-    @NotNull DependencyDataProvider create(@NotNull final URL dependencyFileURL);
+    @NotNull DependencyDataProvider create(@Nullable final URL dependencyFileURL);
 }

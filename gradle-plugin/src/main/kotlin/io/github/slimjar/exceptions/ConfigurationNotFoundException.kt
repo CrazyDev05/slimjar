@@ -26,4 +26,4 @@ package io.github.slimjar.exceptions
 
 import java.lang.RuntimeException
 
-public class ConfigurationNotFoundException(message: String) : RuntimeException(message)
+class ConfigurationNotFoundException(message: String) : RuntimeException(message)
