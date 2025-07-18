@@ -95,9 +95,10 @@ public final class CachingDependencyResolver implements DependencyResolver {
         }
 
         final var usedRepositories = enforcedRepositories.isEmpty() ? repositories : enforcedRepositories;
-        final var futures = usedRepositories.stream()
-                .map(enquirer -> ForkJoinTask.adapt(() -> enquirer.enquire(dependency)).fork())
-                .toList();
+        final var futures = new ArrayList<ForkJoinTask<ResolutionResult>>(usedRepositories.size());
+        for (final var enquirer : usedRepositories) {
+            futures.add(ForkJoinTask.adapt(() -> enquirer.enquire(dependency)).fork());
+        }
         for (final var future : futures) {
             final ResolutionResult result = future.join();
             if (result == null) continue;

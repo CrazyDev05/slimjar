@@ -31,6 +31,8 @@ import io.github.slimjar.*
 import io.github.slimjar.SlimJarPlugin.Companion.SLIM_API_CONFIGURATION_NAME
 import io.github.slimjar.SlimJarPlugin.Companion.SLIM_CONFIGURATION_NAME
 import io.github.slimjar.func.performCompileTimeResolution
+import io.github.slimjar.logging.LogDispatcher
+import io.github.slimjar.logging.ProcessLogger
 import io.github.slimjar.resolver.CachingDependencyResolver
 import io.github.slimjar.resolver.ResolutionResult
 import io.github.slimjar.resolver.data.Dependency
@@ -184,6 +186,21 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             enquirerFactory,
             mapOf()
         )
+        val processLogger = object : ProcessLogger {
+            override fun info(message: String, vararg args: Any?) {
+                logger.info(message.format(*args))
+            }
+
+            override fun debug(message: String, vararg args: Any?) {
+                logger.debug(message.format(*args))
+            }
+
+            override fun error(message: String, vararg args: Any?) {
+                logger.error(message.format(*args))
+            }
+        }
+        val med = LogDispatcher.getMediatingLogger()
+        med.addLogger(processLogger)
 
         val results = mutableMapOf<String, ResolutionResult>()
         // TODO: Cleanup this mess
@@ -231,6 +248,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
                     )
                 }.onEach { (dep, result) -> results[dep.toString()] = result }.collect()
         }
+        med.removeLogger(processLogger)
 
         preResolved.forEach { results.putIfAbsent(it.key, it.value) }
         file.writer().use { writer -> GSON.toJson(results, writer) }
@@ -280,7 +298,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
 
     private fun RepositoryHandler.getMavenRepos() = filterIsInstance<MavenArtifactRepository>()
         .filterNot { it.url.toString().startsWith("file") }
-        .toSet()
+        .distinct()
         .map { Repository(it.url.toURL()) }
 
     private fun ResolvableDependencies.getSlimDependencies(): List<Dependency> =

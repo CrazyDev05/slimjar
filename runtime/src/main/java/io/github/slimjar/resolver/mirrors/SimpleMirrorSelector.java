@@ -24,33 +24,64 @@
 
 package io.github.slimjar.resolver.mirrors;
 
+import io.github.slimjar.logging.LocationAwareProcessLogger;
+import io.github.slimjar.logging.ProcessLogger;
 import io.github.slimjar.resolver.data.Mirror;
 import io.github.slimjar.resolver.data.Repository;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public final class SimpleMirrorSelector implements MirrorSelector {
+    @NotNull private static final ProcessLogger LOGGER = LocationAwareProcessLogger.generic();
+
     @Override
     @Contract(pure = true)
     public @NotNull Collection<@NotNull Repository> select(
         final @NotNull Collection<@NotNull Repository> mainRepositories,
         final @NotNull Collection<@NotNull Mirror> mirrors
     ) {
-        final var originals = mirrors.stream()
-                .map(Mirror::original)
-                .collect(Collectors.toSet());
-        final var resolved = mainRepositories.stream()
-                .filter(repo -> !originals.contains(repo.url()))
-                .collect(Collectors.toSet());
-        final var mirrored = mirrors.stream()
-                .map(Mirror::mirroring)
-                .map(Repository::new)
-                .collect(Collectors.toSet());
+        if (mainRepositories.isEmpty()) return mainRepositories;
+        if (mirrors.isEmpty()) return mainRepositories;
 
-        resolved.addAll(mirrored);
-        return resolved;
+        final var repositoryMirrors = mirrors.stream()
+                .collect(Collectors.toMap(
+                        m -> m.original().toString(),
+                        m -> m.mirroring().toString(),
+                        (existing, replacement) -> {
+                            LOGGER.error("Duplicate mirror found '{}' and '{}'", existing, replacement);
+                            return existing;
+                        }
+                ));
+
+        return mainRepositories.stream()
+                .distinct()
+                .map(original -> {
+                    var url = original.url().toString();
+                    var visited = new LinkedHashSet<String>();
+
+                    String mirror;
+                    while ((mirror = repositoryMirrors.get(url)) != null) {
+                        if (!visited.add(url)) {
+                            LOGGER.error("Circular mirror detected for '{}'", original.url());
+                            break;
+                        }
+                        url = mirror;
+                    }
+
+                    try {
+                        return new Repository(URI.create(url).toURL());
+                    } catch (MalformedURLException e) {
+                        LOGGER.error("Failed to parse mirror URL '{}'", url);
+                        return original;
+                    }
+                })
+                .distinct()
+                .toList();
     }
 }
