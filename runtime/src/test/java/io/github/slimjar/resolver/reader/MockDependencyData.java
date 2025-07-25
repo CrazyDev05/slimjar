@@ -28,8 +28,7 @@ import io.github.slimjar.resolver.data.Dependency;
 import io.github.slimjar.resolver.data.DependencyData;
 import io.github.slimjar.resolver.data.Repository;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -54,15 +53,15 @@ public final class MockDependencyData {
     public MockDependencyData() throws MalformedURLException {
     }
 
-    public String getSampleDependencyData() {
-        return "{\"mirrors\": [],\"repositories\": [{\"url\": \"https://repo.maven.apache.org/maven2/\"}],\"dependencies\": [{\"groupId\": \"com.google.code.gson\",\"artifactId\": \"gson\",\"version\": \"2.8.6\",\"transitive\": []}],\"relocations\": []}";
-    }
-
     public DependencyData getExpectedSample() {
         return expectedSample;
     }
 
-    public InputStream getDependencyDataInputStream() {
-        return new ByteArrayInputStream(getSampleDependencyData().getBytes());
+    public InputStream getDependencyDataInputStream() throws IOException {
+        var bytes = new ByteArrayOutputStream();
+        try (final var out = new DataOutputStream(bytes)) {
+            expectedSample.write(out);
+        }
+        return new ByteArrayInputStream(bytes.toByteArray());
     }
 }

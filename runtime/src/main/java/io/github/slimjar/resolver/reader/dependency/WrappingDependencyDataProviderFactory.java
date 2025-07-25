@@ -25,8 +25,6 @@
 package io.github.slimjar.resolver.reader.dependency;
 
 import io.github.slimjar.exceptions.ResolutionException;
-import io.github.slimjar.resolver.reader.facade.GsonFacade;
-import io.github.slimjar.resolver.reader.facade.GsonFacadeFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,38 +32,37 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URL;
 import java.util.Objects;
 
-public final class GsonDependencyDataProviderFactory implements DependencyDataProviderFactory {
-    @NotNull private final GsonFacade gsonFacade;
+public final class WrappingDependencyDataProviderFactory implements DependencyDataProviderFactory {
+    @NotNull private final DependencyReader reader;
 
     @Contract(pure = true)
-    public GsonDependencyDataProviderFactory(@NotNull final GsonFacadeFactory gsonFactory) throws ResolutionException {
-        this.gsonFacade = gsonFactory.fromFactory();
+    public WrappingDependencyDataProviderFactory(@NotNull final DependencyReader reader) throws ResolutionException {
+        this.reader = reader;
     }
 
     @Contract(value = "_ -> new", pure = true)
     public @NotNull DependencyDataProvider create(@Nullable final URL dependencyFileURL) {
         if (dependencyFileURL == null) return new EmptyDependencyDataProvider();
-        final var dependencyReader = new GsonDependencyReader(gsonFacade);
-        return new URLDependencyDataProvider(dependencyReader, dependencyFileURL);
+        return new URLDependencyDataProvider(reader, dependencyFileURL);
     }
 
     @Override
     public boolean equals(@Nullable final Object obj) {
         if (obj == this) return true;
-        if (!(obj instanceof GsonDependencyDataProviderFactory that)) return false;
+        if (!(obj instanceof WrappingDependencyDataProviderFactory that)) return false;
 
-        return Objects.equals(this.gsonFacade, that.gsonFacade);
+        return Objects.equals(this.reader, that.reader);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gsonFacade);
+        return Objects.hash(reader);
     }
 
     @Override
     public String toString() {
-        return "GsonDependencyDataProviderFactory[" +
-            "gsonFacade=" + gsonFacade + ']';
+        return "WrappingDependencyDataProviderFactory[" +
+            "reader=" + reader + ']';
     }
 
 }

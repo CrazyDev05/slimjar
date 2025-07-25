@@ -29,9 +29,15 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
+
+import static io.github.slimjar.util.Serialization.readList;
+import static io.github.slimjar.util.Serialization.writeList;
 
 public record DependencyData(
     @NotNull Collection<Mirror> mirrors,
@@ -51,6 +57,24 @@ public record DependencyData(
         this.repositories = Collections.unmodifiableCollection(repositories);
         this.dependencies = Collections.unmodifiableCollection(dependencies);
         this.relocations = Collections.unmodifiableCollection(relocations);
+    }
+
+    @NotNull
+    @Contract(pure = true)
+    public static DependencyData read(@NotNull final DataInput in) throws IOException {
+        return new DependencyData(
+                readList(in, Mirror::read),
+                readList(in, Repository::read),
+                readList(in, Dependency::read),
+                readList(in, RelocationRule::read)
+        );
+    }
+
+    public void write(@NotNull final DataOutput out) throws IOException {
+        writeList(mirrors, out, Mirror::write);
+        writeList(repositories, out, Repository::write);
+        writeList(dependencies, out, Dependency::write);
+        writeList(relocations, out, RelocationRule::write);
     }
 
     @Override

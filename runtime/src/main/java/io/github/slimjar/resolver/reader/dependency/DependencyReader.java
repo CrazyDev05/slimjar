@@ -29,9 +29,19 @@ import io.github.slimjar.exceptions.ResolutionException;
 import io.github.slimjar.resolver.data.DependencyData;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 @FunctionalInterface
 public interface DependencyReader {
     @NotNull DependencyData read(@NotNull final InputStream inputStream) throws ResolutionException;
+
+    DependencyReader DEFAULT = inputStream -> {
+        try (final DataInputStream in = new DataInputStream(inputStream)) {
+            return DependencyData.read(in);
+        } catch (final IOException e) {
+            throw new ResolutionException("Failed to read dependency file", e);
+        }
+    };
 }

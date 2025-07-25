@@ -93,6 +93,11 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
     val requireChecksum: Property<Boolean> = project.objects.property<Boolean>()
         .convention(false).andFinalizeValueOnRead()
 
+    @get:Input
+    @get:Optional
+    val dumpJson: Property<Boolean> = project.objects.property<Boolean>()
+        .convention(false).andFinalizeValueOnRead()
+
     /**
      * @receiver the original path
      * @param target the prefixed path to relocate to.

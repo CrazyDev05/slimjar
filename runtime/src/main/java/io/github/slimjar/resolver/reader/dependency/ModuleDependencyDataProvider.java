@@ -59,7 +59,7 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
             }
 
             final var jarFile = jarURLConnection.getJarFile();
-            final var dependencyFileEntry = jarFile.getEntry("slimjar.json");
+            final var dependencyFileEntry = jarFile.getEntry("slimjar.dat");
             if (dependencyFileEntry == null) {
                 return new DependencyData(
                         Collections.emptySet(),
@@ -82,7 +82,7 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
      */
     @Contract(value = "-> new", pure = true)
     public @NotNull URL getURL() throws MalformedURLException {
-        return new URL("jar:file:" + moduleUrl.getFile() + "!/slimjar.json");
+        return new URL("jar:file:" + moduleUrl.getFile() + "!/slimjar.dat");
     }
 
     public @NotNull DependencyReader dependencyReader() {

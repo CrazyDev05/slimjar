@@ -22,36 +22,44 @@
  * SOFTWARE.
  */
 
-package io.github.slimjar.resolver.reader.facade;
+package io.github.slimjar.resolver.reader.resolution;
 
+import io.github.slimjar.resolver.ResolutionResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
-@SuppressWarnings({"java:S2326", "unused"}) // Used in reflection
-public class TypeToken<T> {
-    private final @NotNull Type rawType;
-
-    public TypeToken() {
-        this.rawType = getSuperclassTypeParameter(getClass());
-    }
-
-    @Contract(pure = true)
-    public @NotNull Type rawType() {
-        return rawType;
-    }
+public final class WrappingPreResolutionDataProvider implements PreResolutionDataProvider {
+    @NotNull private final PreResolutionDataReader resolutionDataReader;
+    @NotNull private final URL resolutionFileURL;
+    @Nullable private Map<@NotNull String, @NotNull ResolutionResult> cachedData = null;
 
     @Contract(pure = true)
-    private static @NotNull Type getSuperclassTypeParameter(@NotNull final Class<?> subclass) {
-        final var superclass = subclass.getGenericSuperclass();
+    public WrappingPreResolutionDataProvider(
+        @NotNull final PreResolutionDataReader resolutionDataReader,
+        @NotNull final URL resolutionFileURL
+    ) {
+        this.resolutionDataReader = resolutionDataReader;
+        this.resolutionFileURL = resolutionFileURL;
+    }
 
-        if (superclass instanceof Class) {
-            throw new RuntimeException("Type parameter not found");
+    @Override
+    @Contract(pure = true)
+    public @NotNull Map<@NotNull String, @NotNull ResolutionResult> get() {
+        if (cachedData != null) {
+            return cachedData;
         }
 
-        final var parameterized = (ParameterizedType) superclass;
-        return parameterized.getActualTypeArguments()[0];
+        try (final var is = resolutionFileURL.openStream()) {
+            cachedData = resolutionDataReader.read(is);
+            return cachedData;
+        } catch (final IOException | ReflectiveOperationException ignored) {
+            return Collections.emptyMap();
+        }
     }
 }

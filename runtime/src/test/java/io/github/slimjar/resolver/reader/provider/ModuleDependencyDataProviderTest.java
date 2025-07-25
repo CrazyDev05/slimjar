@@ -25,28 +25,19 @@
 package io.github.slimjar.resolver.reader.provider;
 
 import io.github.slimjar.resolver.data.DependencyData;
-import io.github.slimjar.resolver.data.Repository;
-import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.resolver.reader.dependency.DependencyDataProvider;
-import io.github.slimjar.resolver.reader.dependency.GsonDependencyReader;
 import io.github.slimjar.resolver.reader.MockDependencyData;
+import io.github.slimjar.resolver.reader.dependency.DependencyReader;
 import io.github.slimjar.resolver.reader.dependency.ModuleDependencyDataProvider;
-import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -55,15 +46,6 @@ import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
 public class ModuleDependencyDataProviderTest {
-    private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
-    private static final Collection<Repository> CENTRAL_MIRRORS;
-
-    static {
-        CENTRAL_MIRRORS = Collections.singleton(Repository.central());
-        final String userHome = System.getProperty("user.home");
-        final String defaultPath = String.format("%s/.slimjar", userHome);
-        DEFAULT_DOWNLOAD_DIRECTORY = new File(defaultPath).toPath();
-    }
 
     @Test
     public void testModuleDependencyDataProviderNonEmpty() throws Exception {
@@ -114,8 +96,8 @@ public class ModuleDependencyDataProviderTest {
     private ModuleDependencyDataProvider createProvider(
         final URL url,
         final Object jarURLConnection
-    ) throws IOException, ReflectiveOperationException, NoSuchAlgorithmException, URISyntaxException, InterruptedException {
-        final var mockProvider = Mockito.mock(ModuleDependencyDataProvider.class, Mockito.withSettings().useConstructor(new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade()), url));
+    ) throws IOException {
+        final var mockProvider = Mockito.mock(ModuleDependencyDataProvider.class, Mockito.withSettings().useConstructor(DependencyReader.DEFAULT, url));
 
         Mockito.doReturn(url).when(mockProvider).getURL();
         Mockito.doCallRealMethod().when(mockProvider).get();
@@ -132,7 +114,7 @@ public class ModuleDependencyDataProviderTest {
         final var jarFile = Mockito.mock(JarFile.class);
 
         Mockito.doReturn(jarFile).when(jarURLConnection).getJarFile();
-        Mockito.doReturn(zipEntry).when(jarFile).getEntry("slimjar.json");
+        Mockito.doReturn(zipEntry).when(jarFile).getEntry("slimjar.dat");
         Mockito.doReturn(inputStream).when(jarFile).getInputStream(zipEntry);
 
         return jarURLConnection;

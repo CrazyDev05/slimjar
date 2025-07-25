@@ -29,8 +29,14 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
+
+import static io.github.slimjar.util.Serialization.readURL;
+import static io.github.slimjar.util.Serialization.writeURL;
 
 public final class ResolutionResult {
     @NotNull private final Repository repository;
@@ -56,6 +62,30 @@ public final class ResolutionResult {
         if (!aggregator) {
             Objects.requireNonNull(dependencyURL, "Resolved URL must not be null for non-aggregator dependencies");
         }
+    }
+
+    @NotNull
+    @Contract(pure = true)
+    public static ResolutionResult read(@NotNull final DataInput in) throws IOException {
+        return new ResolutionResult(
+                Repository.read(in),
+                readURL(in),
+                in.readBoolean() ? readURL(in) : null,
+                in.readBoolean(),
+                false
+        );
+    }
+
+    public void write(@NotNull final DataOutput out) throws IOException {
+        repository.write(out);
+        writeURL(dependencyURL, out);
+        if (checksumURL == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            writeURL(checksumURL, out);
+        }
+        out.writeBoolean(aggregator);
     }
 
     public @NotNull Repository repository() {

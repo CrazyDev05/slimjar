@@ -24,14 +24,17 @@
 
 package io.github.slimjar.relocation;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
+
+import static io.github.slimjar.util.Serialization.readList;
+import static io.github.slimjar.util.Serialization.writeList;
 
 public record RelocationRule(
     @NotNull String originalPackagePattern,
@@ -47,6 +50,24 @@ public record RelocationRule(
         @NotNull final String relocated
     ) {
         this(original, relocated, Collections.emptyList(), Collections.emptyList());
+    }
+
+    @NotNull
+    @Contract(pure = true)
+    public static RelocationRule read(@NotNull final DataInput in) throws IOException {
+        return new RelocationRule(
+                in.readUTF(),
+                in.readUTF(),
+                readList(in, DataInput::readUTF),
+                readList(in, DataInput::readUTF)
+        );
+    }
+
+    public void write(@NotNull final DataOutput out) throws IOException {
+        out.writeUTF(originalPackagePattern);
+        out.writeUTF(relocatedPackagePattern);
+        writeList(exclusions, out, (pattern, o) -> o.writeUTF(pattern));
+        writeList(inclusions, out, (pattern, o) -> o.writeUTF(pattern));
     }
 
     @Override

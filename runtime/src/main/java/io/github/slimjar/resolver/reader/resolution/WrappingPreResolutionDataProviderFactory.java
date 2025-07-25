@@ -22,42 +22,22 @@
  * SOFTWARE.
  */
 
-package io.github.slimjar.resolver.reader.facade;
+package io.github.slimjar.resolver.reader.resolution;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.net.URL;
 
-public record ReflectiveGsonFacade(
-    @NotNull Object gson,
-    @NotNull Method gsonFromJsonMethod,
-    @NotNull Method gsonFromJsonTypeMethod,
-    @NotNull Method canonicalizeMethod
-) implements GsonFacade {
+public record WrappingPreResolutionDataProviderFactory(
+    @NotNull PreResolutionDataReader reader
+) implements PreResolutionDataProviderFactory {
 
     @Override
     @Contract(pure = true)
-    public <T> @NotNull T fromJson(
-        @NotNull final InputStreamReader reader,
-        @NotNull final Class<T> clazz
-    ) throws ReflectiveOperationException {
-        final var result = gsonFromJsonMethod.invoke(gson, reader, clazz);
-        if (clazz.isAssignableFrom(result.getClass())) {
-            return (T) result;
-        } else throw new AssertionError("Gson returned wrong type!");
-    }
-
-    @Override
-    @Contract(pure = true)
-    public <T> @NotNull T fromJson(
-        @NotNull final InputStreamReader reader,
-        @NotNull final Type rawType
-    ) throws ReflectiveOperationException {
-        final var canonicalizedType = canonicalizeMethod.invoke(null, rawType);
-        final var result = gsonFromJsonTypeMethod.invoke(gson, reader, canonicalizedType);
-        return (T) result;
+    public @NotNull PreResolutionDataProvider create(@Nullable final URL resolutionFileURL) {
+        if (resolutionFileURL == null) return new EmptyPreResolutionDataProvider();
+        return new WrappingPreResolutionDataProvider(reader, resolutionFileURL);
     }
 }

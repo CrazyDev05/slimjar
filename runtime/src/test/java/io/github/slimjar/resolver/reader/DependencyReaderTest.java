@@ -25,45 +25,19 @@
 package io.github.slimjar.resolver.reader;
 
 import io.github.slimjar.resolver.data.DependencyData;
-import io.github.slimjar.resolver.data.Repository;
-import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector;
 import io.github.slimjar.resolver.reader.dependency.DependencyReader;
-import io.github.slimjar.resolver.reader.dependency.GsonDependencyReader;
-import io.github.slimjar.resolver.reader.facade.ReflectiveGsonFacadeFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class DependencyReaderTest {
 
-    private static final Path DEFAULT_DOWNLOAD_DIRECTORY;
-    private static final Collection<Repository> CENTRAL_MIRRORS;
-
-    static {
-        CENTRAL_MIRRORS = Collections.singleton(Repository.central());
-        final String userHome = System.getProperty("user.home");
-        final String defaultPath = String.format("%s/.slimjar", userHome);
-        DEFAULT_DOWNLOAD_DIRECTORY = new File(defaultPath).toPath();
-    }
-
     @Test
-    public void testDependencyReaderParse() throws IOException, NoSuchAlgorithmException, ReflectiveOperationException, URISyntaxException, InterruptedException {
+    public void testDependencyReaderParse() throws IOException {
         final MockDependencyData mockDependencyData = new MockDependencyData();
-        final DependencyReader dependencyReader = new GsonDependencyReader(ReflectiveGsonFacadeFactory.create(DEFAULT_DOWNLOAD_DIRECTORY, CENTRAL_MIRRORS).createFacade());
-        final InputStream inputStream = new ByteArrayInputStream(mockDependencyData.getSampleDependencyData().getBytes());
-        final DependencyData dependencyData = dependencyReader.read(inputStream);
+        final DependencyData dependencyData = DependencyReader.DEFAULT.read(mockDependencyData.getDependencyDataInputStream());
         Assertions.assertEquals(dependencyData, mockDependencyData.getExpectedSample(), "Read dependency properly");
     }
 

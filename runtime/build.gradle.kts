@@ -5,7 +5,6 @@ dependencies {
     
     testImplementation(libs.annotations)
     testImplementation(libs.jar.relocator)
-    testImplementation(libs.gson)
     testImplementation(libs.mockito.core)
     mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
@@ -43,7 +42,6 @@ fun generateTemplates() = copy {
     rename { "io/github/slimjar/$it" }
     expand(
         "version" to project.version,
-        "gson" to libs.versions.gson.get(),
         "relocator" to libs.versions.jar.relocator.get(),
         "asm" to libs.versions.asm.get()
     )

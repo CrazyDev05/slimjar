@@ -29,9 +29,15 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+
+import static io.github.slimjar.util.Serialization.readList;
+import static io.github.slimjar.util.Serialization.writeList;
 
 public record Dependency(
     @NotNull String groupId,
@@ -41,12 +47,37 @@ public record Dependency(
     @NotNull Collection<Dependency> transitive
 ) implements Comparable<Dependency> {
 
+    @NotNull
+    @Contract(pure = true)
+    public static Dependency read(@NotNull final DataInput in) throws IOException {
+        return new Dependency(
+                in.readUTF(),
+                in.readUTF(),
+                in.readUTF(),
+                in.readBoolean() ? in.readUTF() : null,
+                readList(in, Dependency::read)
+        );
+    }
+
     public boolean isSnapshot() {
         return snapshotId != null && !snapshotId.isEmpty();
     }
 
     public Optional<String> snapshot() {
         return isSnapshot() ? Optional.ofNullable(snapshotId) : Optional.empty();
+    }
+
+    public void write(@NotNull final DataOutput out) throws IOException {
+        out.writeUTF(groupId);
+        out.writeUTF(artifactId);
+        out.writeUTF(version);
+        if (snapshotId == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            out.writeUTF(snapshotId);
+        }
+        writeList(transitive, out, Dependency::write);
     }
 
     @Override

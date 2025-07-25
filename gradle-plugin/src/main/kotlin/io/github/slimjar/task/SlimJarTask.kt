@@ -26,7 +26,6 @@ package io.github.slimjar.task
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import io.github.slimjar.*
 import io.github.slimjar.SlimJarPlugin.Companion.SLIM_API_CONFIGURATION_NAME
 import io.github.slimjar.SlimJarPlugin.Companion.SLIM_CONFIGURATION_NAME
@@ -41,7 +40,9 @@ import io.github.slimjar.resolver.data.Repository
 import io.github.slimjar.resolver.enquirer.PingingRepositoryEnquirerFactory
 import io.github.slimjar.resolver.mirrors.SimpleMirrorSelector
 import io.github.slimjar.resolver.pinger.HttpURLPinger
+import io.github.slimjar.resolver.reader.resolution.PreResolutionDataReader
 import io.github.slimjar.resolver.strategy.*
+import io.github.slimjar.util.Serialization.writeList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -98,6 +99,12 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     @get:Optional
     val requireChecksum = slimJarExtension.requireChecksum
 
+    @get:Input
+    @get:Optional
+    val dumpJson = slimJarExtension.dumpJson
+
+    private val dumpDirectory = project.layout.buildDirectory.dir("dump").get().asFile
+
     init {
         group = "slimJar"
         inputs.files(slimjarConfigurations)
@@ -121,9 +128,15 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             dependencies,
             relocations.get()
         )
-        outputDirectory.resolve("slimjar.json")
-            .writer()
-            .use { writer -> GSON.toJson(dependencyData, writer) }
+        if (dumpJson.get()) {
+            dumpDirectory.resolve("slimjar.json")
+                .writer()
+                .use { writer -> GSON.toJson(dependencyData, writer) }
+        }
+
+        outputDirectory.resolve("slimjar.dat")
+            .dataOutputStream()
+            .use { out -> dependencyData.write(out) }
     }
 
     /** Finds jars to be isolated and adds them to the final jar. */
@@ -145,19 +158,14 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
 
     @TaskAction
     internal fun generateResolvedDependenciesFile() = with(project) {
-        val file = outputDirectory.resolve("slimjar-resolutions.json")
+        val file = outputDirectory.resolve("slimjar-resolutions.dat")
         if (!project.performCompileTimeResolution) {
             file.delete()
             return@with
         }
 
         val preResolved: Map<String, ResolutionResult> = if (file.exists()) {
-            file.reader().use { reader ->
-                GSON.fromJson(
-                    reader,
-                    object : TypeToken<Map<String, ResolutionResult>>() {}.type
-                )
-            }
+            file.inputStream().use { PreResolutionDataReader.DEFAULT.read(it) }
         } else {
             mutableMapOf()
         }
@@ -251,7 +259,16 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         med.removeLogger(processLogger)
 
         preResolved.forEach { results.putIfAbsent(it.key, it.value) }
-        file.writer().use { writer -> GSON.toJson(results, writer) }
+
+        if (dumpJson.get()) {
+            dumpDirectory.resolve("slimjar-resolutions.json")
+                .writer()
+                .use { writer -> GSON.toJson(results, writer) }
+        }
+        file.dataOutputStream().use { writeList(results.entries, it) { (key, value), out ->
+            out.writeUTF(key)
+            value.write(out)
+        }}
     }
 
     /**

@@ -28,10 +28,12 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.net.URL;
 import java.util.Objects;
+
+import static io.github.slimjar.util.Serialization.readURL;
+import static io.github.slimjar.util.Serialization.writeURL;
 
 public record Mirror(
     @NotNull URL mirroring,
@@ -39,6 +41,17 @@ public record Mirror(
 ) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @NotNull
+    @Contract(pure = true)
+    public static Mirror read(@NotNull final DataInput in) throws IOException {
+        return new Mirror(readURL(in), readURL(in));
+    }
+
+    public void write(@NotNull final DataOutput out) throws IOException {
+        writeURL(mirroring, out);
+        writeURL(original, out);
+    }
 
     @Override
     @Contract(pure = true)

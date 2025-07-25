@@ -28,9 +28,15 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
+
+import static io.github.slimjar.util.Serialization.readURL;
+import static io.github.slimjar.util.Serialization.writeURL;
 
 public record Repository(@NotNull URL url) {
     @NotNull public static final String CENTRAL_URL = "https://repo1.maven.org/maven2/";
@@ -46,6 +52,14 @@ public record Repository(@NotNull URL url) {
         }
 
         return centralInstance;
+    }
+
+    public static Repository read(@NotNull final DataInput in) throws IOException {
+        return new Repository(readURL(in));
+    }
+
+    public void write(@NotNull final DataOutput out) throws IOException {
+        writeURL(url, out);
     }
 
     @Override
