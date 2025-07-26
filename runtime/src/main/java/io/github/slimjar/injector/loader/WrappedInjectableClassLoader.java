@@ -26,6 +26,7 @@ package io.github.slimjar.injector.loader;
 
 import io.github.slimjar.exceptions.InjectorException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,5 +56,10 @@ public final class WrappedInjectableClassLoader implements Injectable {
     @Override
     public boolean isThreadSafe() {
         return true;
+    }
+
+    @Override
+    public @NotNull ClassLoader getClassLoader() {
+        return urlClassLoader;
     }
 }

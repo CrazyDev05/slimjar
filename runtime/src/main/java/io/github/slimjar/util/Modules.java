@@ -29,12 +29,12 @@ import io.github.slimjar.exceptions.ResolutionException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,19 +66,33 @@ public final class Modules {
     public static @NotNull Set<String> findLocalModules() throws ResolutionException {
         final var url = Modules.class.getProtectionDomain().getCodeSource().getLocation();
         final Path resourcesPath;
+        final FileSystem fileSystem;
         try {
-            resourcesPath = Paths.get(url.toURI());
-        } catch (final URISyntaxException err) {
+            var path = Paths.get(url.toURI());
+            if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".jar")) {
+                fileSystem = FileSystems.newFileSystem(URI.create("jar:" + path.toUri() + "!/"), Map.of());
+                path = fileSystem.getPath("/");
+            } else fileSystem = null;
+            resourcesPath = path;
+        } catch (final URISyntaxException | IOException err) {
             // Shouldn't be possible.
             throw new ResolutionException("Failed to resolve local modules", err);
         }
 
         try (final var stream = Files.walk(resourcesPath, 1)) {
-            return stream.filter(path -> path.endsWith(".isolated-jar"))
-                .map(path -> path.getFileName().toString())
-                .collect(Collectors.toUnmodifiableSet());
+            return stream.map(Path::toString)
+                    .filter(path -> path.endsWith(".isolated-jar"))
+                    .map(path -> path.substring(1, path.length() - ".isolated-jar".length()))
+                    .filter(name -> !name.equals("loader-agent"))
+                    .collect(Collectors.toUnmodifiableSet());
         } catch (final IOException err) {
             throw new ResolutionException("Encountered exception while walking files.", err);
+        } finally {
+            if (fileSystem != null) {
+                try {
+                    fileSystem.close();
+                } catch (IOException ignored) {}
+            }
         }
     }
 }

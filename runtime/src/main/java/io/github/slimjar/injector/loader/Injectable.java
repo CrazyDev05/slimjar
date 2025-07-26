@@ -26,6 +26,7 @@ package io.github.slimjar.injector.loader;
 
 import io.github.slimjar.exceptions.InjectorException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 
@@ -35,5 +36,9 @@ public interface Injectable {
 
     default boolean isThreadSafe() {
         return false;
+    }
+
+    default @Nullable ClassLoader getClassLoader() {
+        return null;
     }
 }

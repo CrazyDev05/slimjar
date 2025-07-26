@@ -33,25 +33,32 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 public final class UnsafeInjectable implements Injectable {
     @NotNull private final ArrayDeque<URL> unopenedURLs;
     @NotNull private final ArrayList<URL> pathURLs;
+    @NotNull private final ClassLoader classLoader;
 
     public UnsafeInjectable(
         @NotNull final ArrayDeque<URL> unopenedURLs,
-        @NotNull final ArrayList<URL> pathURLs
+        @NotNull final ArrayList<URL> pathURLs,
+        @NotNull final ClassLoader classLoader
     ) {
         this.unopenedURLs = unopenedURLs;
         this.pathURLs = pathURLs;
+        this.classLoader = classLoader;
     }
 
     @Override
     public boolean isThreadSafe() {
         return true;
+    }
+
+    @Override
+    public @NotNull ClassLoader getClassLoader() {
+        return classLoader;
     }
 
     @Override
@@ -76,7 +83,8 @@ public final class UnsafeInjectable implements Injectable {
             Object ucp = lookup.findGetter(classLoader.getClass(), "ucp", lookup.findClass("jdk.internal.loader.URLClassPath")).invoke(classLoader);
             return new UnsafeInjectable(
                     (ArrayDeque<URL>) fetchField(unsafe, ucp, "unopenedUrls"),
-                    (ArrayList<URL>) fetchField(unsafe, ucp, "path")
+                    (ArrayList<URL>) fetchField(unsafe, ucp, "path"),
+                    classLoader
             );
         } catch (Throwable e) {
             if (e instanceof ReflectiveOperationException ex)

@@ -78,16 +78,16 @@ import java.util.Collections;
  * Serves as a configuration for different components slimjar will use during injection.
  * Allows completely modifying and adding upon onto the default behavior when needed.
  */
-public abstract class ApplicationBuilder {
+public abstract class ApplicationBuilder<T extends ApplicationBuilder<T>> {
     @NotNull private static final Path DEFAULT_DOWNLOAD_DIRECTORY = Path.of(System.getProperty("user.home"), ".slimjar");
 
+    @SuppressWarnings("unchecked")
+    @NotNull protected final T self = (T) this;
     @NotNull private final String applicationName;
     @Nullable private URL dependencyFileUrl;
     @Nullable private URL preResolutionFileUrl;
     @Nullable private Path downloadDirectoryPath;
     @Nullable private RelocatorFactory relocatorFactory;
-    @Nullable private DependencyDataProviderFactory moduleDataProviderFactory;
-    @Nullable private PreResolutionDataProviderFactory modulePreResolutionDataProviderFactory;
     @Nullable private DependencyDataProviderFactory dataProviderFactory;
     @Nullable private PreResolutionDataProviderFactory preResolutionDataProviderFactory;
     @Nullable private RelocationHelperFactory relocationHelperFactory;
@@ -111,17 +111,17 @@ public abstract class ApplicationBuilder {
     /**
      * Creates an ApplicationBuilder that allows jar-in-jar dependency loading.
      * @param name Name of your application/project. This exists to uniquely identify relocations.
-     * @param config Basic configuration that isolated classloader requires.
+     * @param applicationClass the class name of the application to isolate, must not be null
      * @param args Arguments to pass to created Application class (specified in <code>config</code>).
      * @return ApplicationBuilder that allows jar-in-jar dependency loading.
      */
     @Contract(value = "_, _, _ -> new", pure = true)
-    public static @NotNull ApplicationBuilder isolated(
+    public static @NotNull IsolatedApplicationBuilder isolated(
         @NotNull final String name,
-        @NotNull final IsolationConfiguration config,
+        @NotNull final String applicationClass,
         @Nullable Object @NotNull ... args
     ) {
-        return new IsolatedApplicationBuilder(name, config, args);
+        return new IsolatedApplicationBuilder(name, applicationClass, args);
     }
 
     /**
@@ -130,8 +130,8 @@ public abstract class ApplicationBuilder {
      * @return ApplicationBuilder that allows loading into the current classloader.
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull ApplicationBuilder appending(@NotNull final String name) {
-        return InjectingApplicationBuilder.createAppending(name);
+    public static @NotNull InjectingApplicationBuilder<?> appending(@NotNull final String name) {
+        return InjectingApplicationBuilder.create(name);
     }
 
     /**
@@ -143,11 +143,11 @@ public abstract class ApplicationBuilder {
      * @return ApplicationBuilder that allows loading into any given {@link Injectable} instance.
      */
     @Contract(value = "_, _ -> new")
-    public static @NotNull ApplicationBuilder injecting(
+    public static @NotNull InjectingApplicationBuilder<?> injecting(
         @NotNull final String name,
         @NotNull final Injectable injectable
     ) {
-        return new InjectingApplicationBuilder(name, injectable);
+        return InjectingApplicationBuilder.create(name, injectable);
     }
 
     /**
@@ -156,9 +156,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder dependencyFileUrl(@NotNull final URL dependencyFileUrl) {
+    public final @NotNull T dependencyFileUrl(@NotNull final URL dependencyFileUrl) {
         this.dependencyFileUrl = dependencyFileUrl;
-        return this;
+        return self;
     }
 
     /**
@@ -167,9 +167,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder preResolutionFileUrl(@NotNull final URL preResolutionFileUrl) {
+    public final @NotNull T preResolutionFileUrl(@NotNull final URL preResolutionFileUrl) {
         this.preResolutionFileUrl = preResolutionFileUrl;
-        return this;
+        return self;
     }
 
     /**
@@ -178,9 +178,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder downloadDirectoryPath(@NotNull final Path downloadDirectoryPath) {
+    public final @NotNull T downloadDirectoryPath(@NotNull final Path downloadDirectoryPath) {
         this.downloadDirectoryPath = downloadDirectoryPath;
-        return this;
+        return self;
     }
 
     /**
@@ -191,33 +191,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder relocatorFactory(@NotNull final RelocatorFactory relocatorFactory) {
+    public final @NotNull T relocatorFactory(@NotNull final RelocatorFactory relocatorFactory) {
         this.relocatorFactory = relocatorFactory;
-        return this;
-    }
-
-    /**
-     * Factory that produces DataProvider for modules in jar-in-jar classloading. Ignored if not using jar-in-jar/isolated(...)
-     * Used to fetch the `slimjar.dat` file of each submodule.
-     * @param moduleDataProviderFactory Factory that produces DataProvider for modules in jar-in-jar
-     * @return <code>this</code>
-     */
-    @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder moduleDataProviderFactory(@NotNull final DependencyDataProviderFactory moduleDataProviderFactory) {
-        this.moduleDataProviderFactory = moduleDataProviderFactory;
-        return this;
-    }
-
-    /**
-     * Factory that produces {@link PreResolutionDataProvider} for modules in jar-in-jar classloading. Ignored if not using jar-in-jar/isolated(...)
-     * Used to fetch the `slimjar.dat` file of each submodule.
-     * @param modulePreResolutionDataProviderFactory Factory that produces DataProvider for modules in jar-in-jar
-     * @return <code>this</code>
-     */
-    @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder modulePreResolutionDataProviderFactory(@NotNull final  PreResolutionDataProviderFactory modulePreResolutionDataProviderFactory) {
-        this.modulePreResolutionDataProviderFactory = modulePreResolutionDataProviderFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -227,9 +203,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder dataProviderFactory(@NotNull final DependencyDataProviderFactory dataProviderFactory) {
+    public final @NotNull T dataProviderFactory(@NotNull final DependencyDataProviderFactory dataProviderFactory) {
         this.dataProviderFactory = dataProviderFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -239,9 +215,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder preResolutionDataProviderFactory(@NotNull final PreResolutionDataProviderFactory preResolutionDataProviderFactory) {
+    public final @NotNull T preResolutionDataProviderFactory(@NotNull final PreResolutionDataProviderFactory preResolutionDataProviderFactory) {
         this.preResolutionDataProviderFactory = preResolutionDataProviderFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -252,9 +228,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder relocationHelperFactory(@NotNull final RelocationHelperFactory relocationHelperFactory) {
+    public final @NotNull T relocationHelperFactory(@NotNull final RelocationHelperFactory relocationHelperFactory) {
         this.relocationHelperFactory = relocationHelperFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -264,9 +240,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder injectorFactory(@NotNull final DependencyInjectorFactory injectorFactory) {
+    public final @NotNull T injectorFactory(@NotNull final DependencyInjectorFactory injectorFactory) {
         this.injectorFactory = injectorFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -276,9 +252,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder resolverFactory(@NotNull final DependencyResolverFactory resolverFactory) {
+    public final @NotNull T resolverFactory(@NotNull final DependencyResolverFactory resolverFactory) {
         this.resolverFactory = resolverFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -287,9 +263,9 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder enquirerFactory(@NotNull final RepositoryEnquirerFactory enquirerFactory) {
+    public final @NotNull T enquirerFactory(@NotNull final RepositoryEnquirerFactory enquirerFactory) {
         this.enquirerFactory = enquirerFactory;
-        return this;
+        return self;
     }
 
     /**
@@ -298,27 +274,27 @@ public abstract class ApplicationBuilder {
      * @return <code>this</code>
      */
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder downloaderFactory(@NotNull final DependencyDownloaderFactory downloaderFactory) {
+    public final @NotNull T downloaderFactory(@NotNull final DependencyDownloaderFactory downloaderFactory) {
         this.downloaderFactory = downloaderFactory;
-        return this;
+        return self;
     }
 
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder verifierFactory(@NotNull final DependencyVerifierFactory verifierFactory) {
+    public final @NotNull T verifierFactory(@NotNull final DependencyVerifierFactory verifierFactory) {
         this.verifierFactory = verifierFactory;
-        return this;
+        return self;
     }
 
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder mirrorSelector(@NotNull final MirrorSelector mirrorSelector) {
+    public final @NotNull T mirrorSelector(@NotNull final MirrorSelector mirrorSelector) {
         this.mirrorSelector = mirrorSelector;
-        return this;
+        return self;
     }
 
     @Contract(value = "_ -> this", mutates = "this")
-    public final @NotNull ApplicationBuilder logger(@NotNull final ProcessLogger logger) {
+    public final @NotNull T logger(@NotNull final ProcessLogger logger) {
         this.logger = logger;
-        return this;
+        return self;
     }
 
     @Contract(pure = true)
@@ -361,24 +337,6 @@ public abstract class ApplicationBuilder {
         }
 
         return relocatorFactory;
-    }
-
-    @Contract(mutates = "this")
-    protected final @NotNull DependencyDataProviderFactory getModuleDataProviderFactory() {
-        if (moduleDataProviderFactory == null) {
-            this.moduleDataProviderFactory = new ExternalDependencyDataProviderFactory(DependencyReader.DEFAULT);
-        }
-
-        return moduleDataProviderFactory;
-    }
-
-    @Contract(mutates = "this")
-    protected final @NotNull PreResolutionDataProviderFactory getModulePreResolutionDataProviderFactory() {
-        if (modulePreResolutionDataProviderFactory == null) {
-            this.modulePreResolutionDataProviderFactory = new WrappingPreResolutionDataProviderFactory(PreResolutionDataReader.DEFAULT);
-        }
-
-        return modulePreResolutionDataProviderFactory;
     }
 
     @Contract(mutates = "this")

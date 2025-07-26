@@ -26,6 +26,7 @@ package io.github.slimjar.injector.loader;
 
 import io.github.slimjar.exceptions.InjectorException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -48,5 +49,10 @@ public abstract class InjectableClassLoader extends URLClassLoader implements In
     @Override
     public boolean isThreadSafe() {
         return true;
+    }
+
+    @Override
+    public @Nullable ClassLoader getClassLoader() {
+        return this;
     }
 }

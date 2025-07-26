@@ -35,19 +35,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.function.Function;
 
-public final class InjectingApplicationBuilder extends ApplicationBuilder {
-    @NotNull private final Function<ApplicationBuilder, Injectable> injectableSupplier;
+public abstract class InjectingApplicationBuilder<T extends InjectingApplicationBuilder<T>> extends ApplicationBuilder<T> {
+    @NotNull protected final Function<T, Injectable> injectableSupplier;
 
     @Contract(pure = true)
     public InjectingApplicationBuilder(
         @NotNull final String applicationName,
-        @NotNull final Injectable injectable
-    ) { this(applicationName, it -> injectable); }
-
-    @Contract(pure = true)
-    public InjectingApplicationBuilder(
-        @NotNull final String applicationName,
-        @NotNull final Function<ApplicationBuilder, Injectable> injectableSupplier
+        @NotNull final Function<T, Injectable> injectableSupplier
     ) {
         super(applicationName);
         this.injectableSupplier = injectableSupplier;
@@ -55,7 +49,7 @@ public final class InjectingApplicationBuilder extends ApplicationBuilder {
 
     @Override
     @Contract(value = "-> new", mutates = "this")
-    public @NotNull Application buildApplication() {
+    protected @NotNull Application buildApplication() {
         final var dataProvider = getDataProviderFactory().create(getDependencyFileUrl());
         final var dependencyData = dataProvider.get();
         final var dependencyInjector = createInjector();
@@ -63,26 +57,43 @@ public final class InjectingApplicationBuilder extends ApplicationBuilder {
         final var preResolutionDataProvider = getPreResolutionDataProviderFactory().create(getPreResolutionFileUrl());
         final var preResolutionResultMap = preResolutionDataProvider.get();
 
-        dependencyInjector.inject(injectableSupplier.apply(this), dependencyData, preResolutionResultMap);
+        dependencyInjector.inject(injectableSupplier.apply(self), dependencyData, preResolutionResultMap);
         return new AppendingApplication();
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull ApplicationBuilder createAppending(@NotNull final String applicationName) {
+    public static @NotNull InjectingApplicationBuilder<?> create(@NotNull final String applicationName) {
         final var classLoader = ApplicationBuilder.class.getClassLoader();
-        return createAppending(applicationName, classLoader);
+        return create(applicationName, classLoader);
     }
 
     @Contract(value = "_, _ -> new", pure = true)
-    public static @NotNull ApplicationBuilder createAppending(
+    public static @NotNull InjectingApplicationBuilder<?> create(
         @NotNull final String applicationName,
         @NotNull final ClassLoader classLoader
     ) {
-        return new InjectingApplicationBuilder(applicationName, (final ApplicationBuilder builder) -> InjectableFactory.create(
+        return new Impl(applicationName, builder -> InjectableFactory.create(
             builder.getDownloadDirectoryPath(),
             Collections.singleton(Repository.central()),
             classLoader
         ));
+    }
+
+    @Contract(value = "_, _ -> new", pure = true)
+    public static @NotNull InjectingApplicationBuilder<?> create(
+            @NotNull final String applicationName,
+            @NotNull final Injectable injectable
+    ) {
+        return new Impl(applicationName, builder -> injectable);
+    }
+
+    private static final class Impl extends InjectingApplicationBuilder<Impl> {
+        private Impl(
+                @NotNull final String applicationName,
+                @NotNull final Function<Impl, Injectable> injectableSupplier
+        ) {
+            super(applicationName, injectableSupplier);
+        }
     }
 }
 

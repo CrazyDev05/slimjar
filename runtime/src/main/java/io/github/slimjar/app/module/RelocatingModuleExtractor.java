@@ -24,44 +24,56 @@
 
 package io.github.slimjar.app.module;
 
+import io.github.slimjar.downloader.verify.ChecksumCalculator;
+import io.github.slimjar.downloader.verify.FileChecksumCalculator;
 import io.github.slimjar.exceptions.ModuleExtractorException;
-import io.github.slimjar.exceptions.ModuleNotFoundException;
+import io.github.slimjar.relocation.Relocator;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
 
-import static io.github.slimjar.util.Connections.createTempFile;
-import static io.github.slimjar.util.Connections.openJarConnection;
+public final class RelocatingModuleExtractor implements ModuleExtractor {
+    @NotNull private final Path dataDirectory;
+    @NotNull private final Relocator relocator;
+    @NotNull private final ChecksumCalculator calculator;
 
-@FunctionalInterface
-public interface ModuleExtractor {
-    @NotNull URL extractModule(
-        @NotNull final URL url,
-        @NotNull final String name
-    ) throws ModuleExtractorException;
+    public RelocatingModuleExtractor(
+            @NotNull final Path dataDirectory,
+            @NotNull final Relocator relocator
+    ) {
+        this.dataDirectory = dataDirectory;
+        this.relocator = relocator;
+        this.calculator = new FileChecksumCalculator("sha256");
+    }
 
-    static @NotNull File extractFile(
+    @Override
+    public @NotNull URL extractModule(
             @NotNull final URL url,
             @NotNull final String name
     ) throws ModuleExtractorException {
-        final var tempFile = createTempFile(name);
-        final var connection = openJarConnection(url);
+        final var target = dataDirectory.resolve(name + ".jar").toFile();
+        final var checksumFile = dataDirectory.resolve(name + ".checksum");
+        final var extracted = ModuleExtractor.extractFile(url, name);
+        final var calculatedChecksum = calculator.calculate(extracted);
+        try {
+            final var expectedChecksum = Files.exists(checksumFile) ?
+                    new String(Files.readAllBytes(checksumFile)).trim() :
+                    null;
 
-        try (final var jarFile = connection.getJarFile()) {
-            final var module = jarFile.getJarEntry("%s.isolated-jar".formatted(name));
-            if (module == null) throw new ModuleNotFoundException(name);
-
-            try (final var stream = jarFile.getInputStream(module)) {
-                Files.copy(stream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if (!calculatedChecksum.equals(expectedChecksum)) {
+                target.getParentFile().mkdirs();
+                relocator.relocate(extracted, target);
+                Files.write(checksumFile, calculatedChecksum.getBytes());
             }
 
-            return tempFile;
+            return target.toURI().toURL();
         } catch (final IOException e) {
             throw new ModuleExtractorException("Encountered IOException.", e);
+        } finally {
+            extracted.delete();
         }
     }
 }

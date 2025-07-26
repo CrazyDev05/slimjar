@@ -24,10 +24,14 @@
 
 package io.github.slimjar.util;
 
+import io.github.slimjar.exceptions.ModuleExtractorException;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -56,5 +60,30 @@ public final class Connections {
     public static void tryDisconnect(@NotNull final URLConnection urlConnection) {
         if (!(urlConnection instanceof HttpURLConnection httpURLConnection)) return;
         httpURLConnection.disconnect();
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull JarURLConnection openJarConnection(@NotNull final URL url) throws ModuleExtractorException {
+        try {
+            final URLConnection connection = url.openConnection();
+            return (JarURLConnection) connection;
+        } catch (final IOException err) {
+            throw new ModuleExtractorException("Failed to open a connection to url (%s).".formatted(url), err);
+        } catch (final ClassCastException err) {
+            throw new ModuleExtractorException("Provided Non-Jar URL (%s).".formatted(url), err);
+        }
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull File createTempFile(@NotNull final String name) throws ModuleExtractorException {
+        try {
+            final var tempFile = File.createTempFile(name, ".jar");
+            tempFile.deleteOnExit();
+            return tempFile;
+        } catch (final IOException | SecurityException err) {
+            throw new ModuleExtractorException("Failed to create temporary file", err);
+        } catch (final IllegalArgumentException err) {
+            throw new ModuleExtractorException("Module name must be at least 3 characters long", err);
+        }
     }
 }

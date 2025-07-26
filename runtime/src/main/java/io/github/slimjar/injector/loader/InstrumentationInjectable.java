@@ -33,6 +33,7 @@ import io.github.slimjar.relocation.facade.ReflectiveJarRelocatorFacadeFactory;
 import io.github.slimjar.resolver.data.Repository;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,11 @@ public final class InstrumentationInjectable implements Injectable {
     @Override
     public boolean isThreadSafe() {
         return true;
+    }
+
+    @Override
+    public @NotNull ClassLoader getClassLoader() {
+        return ClassLoader.getSystemClassLoader();
     }
 
     public static @NotNull Injectable create(

@@ -26,59 +26,65 @@ package io.github.slimjar.app.builder;
 
 import io.github.slimjar.app.Application;
 import io.github.slimjar.exceptions.SlimJarException;
+import io.github.slimjar.injector.loader.Injectable;
 import io.github.slimjar.injector.loader.IsolatedInjectableClassLoader;
-import io.github.slimjar.util.Modules;
 import io.github.slimjar.util.Reflections;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.Collections;
 
-public final class IsolatedApplicationBuilder extends ApplicationBuilder {
-    @NotNull private final IsolationConfiguration isolationConfiguration;
+public final class IsolatedApplicationBuilder extends ModularApplicationBuilder<IsolatedApplicationBuilder> {
     @Nullable private final Object @NotNull [] arguments;
+    @NotNull private final String applicationClass;
+    @Nullable private ClassLoader parentClassloader;
 
     @Contract(pure = true)
     public IsolatedApplicationBuilder(
         @NotNull final String applicationName,
-        @NotNull final IsolationConfiguration isolationConfiguration,
+        @NotNull final String applicationClass,
         @Nullable final Object @NotNull ... arguments
     ) {
-        super(applicationName);
-        this.isolationConfiguration = isolationConfiguration;
+        super(applicationName, builder -> new IsolatedInjectableClassLoader(
+                new URL[0],
+                Collections.singleton(Application.class),
+                builder.getParentClassloader()
+        ));
+        this.applicationClass = applicationClass;
         this.arguments = arguments.clone();
     }
 
-    @Override
-    @Contract(value = "-> new", mutates = "this")
-    public @NotNull Application buildApplication() throws SlimJarException {
-        final var injector = createInjector();
-        final var moduleUrls = Modules.extract(isolationConfiguration.moduleExtractor(), isolationConfiguration.modules());
+    /**
+     * Sets the parent class loader to be used by the modular application.
+     *
+     * @param classLoader The parent {@link ClassLoader} to be assigned. Must not be null.
+     * @return The builder instance for method chaining.
+     */
+    @Contract(value = "_ -> this", mutates = "this")
+    public @NotNull IsolatedApplicationBuilder parentClassLoader(@NotNull final ClassLoader classLoader) {
+        this.parentClassloader = classLoader;
+        return self;
+    }
 
-        final var classLoader = new IsolatedInjectableClassLoader(moduleUrls, Collections.singleton(Application.class), isolationConfiguration.parentClassloader());
-
-        final var dataProvider = getDataProviderFactory().create(getDependencyFileUrl());
-        final var selfDependencyData = dataProvider.get();
-
-        final var preResolutionDataProvider = getPreResolutionDataProviderFactory().create(getPreResolutionFileUrl());
-        final var preResolutionResultMap = preResolutionDataProvider.get();
-
-        injector.inject(classLoader, selfDependencyData, preResolutionResultMap);
-
-        for (final var module : moduleUrls) {
-            final var moduleDataProvider = getModuleDataProviderFactory().create(module);
-            final var modulePreResolutionDataProvider = getModulePreResolutionDataProviderFactory().create(module);
-            injector.inject(classLoader, moduleDataProvider.get(), modulePreResolutionDataProvider.get());
+    @Contract(mutates = "this")
+    private @NotNull ClassLoader getParentClassloader() {
+        if (parentClassloader == null) {
+            this.parentClassloader = ClassLoader.getSystemClassLoader().getParent();
         }
 
+        return parentClassloader;
+    }
+
+    @Override
+    protected Application buildApplication(@NotNull final Injectable injectable) throws SlimJarException {
         try {
-            final var applicationClass = Class.forName(isolationConfiguration.applicationClass(), true, classLoader);
+            final var applicationClass = Class.forName(this.applicationClass, true, injectable.getClassLoader());
             return (Application) Reflections.findConstructor(applicationClass, arguments).newInstance(arguments);
         } catch (final ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException err) {
             throw new SlimJarException("Failed to reflectively create application class.", err);
         }
     }
-
 }
