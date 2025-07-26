@@ -29,6 +29,7 @@ import io.github.slimjar.resolver.data.DependencyData;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
@@ -72,6 +73,13 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
             try (final var inputStream = jarFile.getInputStream(dependencyFileEntry)) {
                 return dependencyReader.read(inputStream);
             }
+        } catch (final FileNotFoundException err) {
+            return new DependencyData(
+                    Collections.emptySet(),
+                    Collections.emptySet(),
+                    Collections.emptySet(),
+                    Collections.emptySet()
+            );
         } catch (final IOException err) {
             throw new ResolutionException("Failed to get dependency data.", err);
         }
