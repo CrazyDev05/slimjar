@@ -73,6 +73,20 @@ open class SlimJarExtension @Inject constructor(private val project: Project) {
         .andFinalizeValueOnRead()
 
     /**
+     * Controls whether dependencies should attempt to be resolved during the configuration phase.
+     *
+     * If set to `true`, the plugin may try to pre-resolve dependencies to improve build performance
+     * by avoiding redundant resolutions during the execution phase. If set to `false`, pre-resolution
+     * will be skipped, and dependency resolution will occur as needed during execution.
+     *
+     * Defaults to true.
+     */
+    @get:Input
+    @get:Optional
+    val tryPreResolve: Property<Boolean> = project.objects.property<Boolean>()
+        .convention(true).andFinalizeValueOnRead()
+
+    /**
      * Contracts that when building the slimjar, all dependencies must be resolved and there is no ambiguity.
      * If any dependency is not found in the global repository, the build will fail.
      *

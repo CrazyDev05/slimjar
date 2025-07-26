@@ -93,6 +93,10 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
 
     @get:Input
     @get:Optional
+    val tryPreResolve = slimJarExtension.tryPreResolve
+
+    @get:Input
+    @get:Optional
     val requirePreResolve = slimJarExtension.requirePreResolve
 
     @get:Input
@@ -115,9 +119,26 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
     }
 
-    /** Action to generate the JSON file inside the jar */
     @TaskAction
-    internal fun createJson() = with(project) {
+    internal fun generateData() = with(project) {
+        val ignored = listOfNotNull("slimjar.dat", "slimjar-resolutions.dat".takeIf { tryPreResolve.get() })
+        outputDirectory.walkBottomUp()
+            .filter { it.extension == "isolated-jar" || !ignored.contains(it.toRelativeString(outputDirectory)) }
+            .forEach { it.delete() }
+        if (dumpJson.get()) {
+            dumpDirectory.deleteRecursively()
+            dumpDirectory.mkdirs()
+        }
+
+        createJson()
+        if (tryPreResolve.get()) {
+            generateResolvedDependenciesFile()
+        }
+        includeIsolatedJars()
+    }
+
+    /** Action to generate the JSON file inside the jar */
+    private fun createJson() = with(project) {
         val dependencies = slimjarConfigurations.get().flatMap { it.incoming.getSlimDependencies() }
         val repositories = globalRepositories.get()
             .map { Repository(URI.create(it).toURL()) }
@@ -140,12 +161,8 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     }
 
     /** Finds jars to be isolated and adds them to the final jar. */
-    @TaskAction
-    internal fun includeIsolatedJars() = with(project) {
+    private fun includeIsolatedJars() = with(project) {
         val indexes = mutableMapOf<String, Int>()
-        outputDirectory.listFiles { it.extension == "isolated-jar" }
-            ?.forEach(File::delete)
-
         isolatedProjects.get()
             .filter { it.key != this }
             .toList()
@@ -156,8 +173,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             }
     }
 
-    @TaskAction
-    internal fun generateResolvedDependenciesFile() = with(project) {
+    private fun generateResolvedDependenciesFile() = with(project) {
         val file = outputDirectory.resolve("slimjar-resolutions.dat")
         if (!project.performCompileTimeResolution) {
             file.delete()
