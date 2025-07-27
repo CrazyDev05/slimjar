@@ -30,15 +30,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 
 public final class Connections {
     private Connections() { }
 
     @NotNull private static final String SLIMJAR_USER_AGENT = "SlimjarApplication/* URLDependencyDownloader";
+
+    public static @NotNull URL newURL(@NotNull final String url) throws MalformedURLException {
+        return URI.create(url).toURL();
+    }
 
     public static @NotNull URLConnection createDownloadConnection(@NotNull final URL url) throws IOException {
         final var connection = url.openConnection();

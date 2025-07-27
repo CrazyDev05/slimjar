@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
+import static io.github.slimjar.util.Connections.newURL;
 import static io.github.slimjar.util.Serialization.readURL;
 import static io.github.slimjar.util.Serialization.writeURL;
 
@@ -45,7 +46,7 @@ public record Repository(@NotNull URL url) {
     public static @NotNull Repository central() {
         if (centralInstance == null) {
             try {
-                centralInstance = new Repository(new URL(CENTRAL_URL));
+                centralInstance = new Repository(newURL(CENTRAL_URL));
             } catch (final MalformedURLException ignored) {
                 // This shouldn't ever happen, just caught to make the compiler happy.
             }

@@ -29,13 +29,14 @@ import io.github.slimjar.resolver.data.DependencyData;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Objects;
+
+import static io.github.slimjar.util.Connections.newURL;
 
 public final class ModuleDependencyDataProvider implements DependencyDataProvider {
     private final @NotNull DependencyReader dependencyReader;
@@ -73,13 +74,6 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
             try (final var inputStream = jarFile.getInputStream(dependencyFileEntry)) {
                 return dependencyReader.read(inputStream);
             }
-        } catch (final FileNotFoundException err) {
-            return new DependencyData(
-                    Collections.emptySet(),
-                    Collections.emptySet(),
-                    Collections.emptySet(),
-                    Collections.emptySet()
-            );
         } catch (final IOException err) {
             throw new ResolutionException("Failed to get dependency data.", err);
         }
@@ -90,7 +84,7 @@ public final class ModuleDependencyDataProvider implements DependencyDataProvide
      */
     @Contract(value = "-> new", pure = true)
     public @NotNull URL getURL() throws MalformedURLException {
-        return new URL("jar:file:" + moduleUrl.getFile() + "!/slimjar.dat");
+        return newURL("jar:file:" + moduleUrl.getFile() + "!/");
     }
 
     public @NotNull DependencyReader dependencyReader() {
