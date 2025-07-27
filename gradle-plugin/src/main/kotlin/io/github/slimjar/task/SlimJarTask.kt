@@ -123,7 +123,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
     internal fun generateData() = with(project) {
         val ignored = listOfNotNull("slimjar.dat", "slimjar-resolutions.dat".takeIf { tryPreResolve.get() })
         outputDirectory.walkBottomUp()
-            .filter { it.extension == "isolated-jar" || !ignored.contains(it.toRelativeString(outputDirectory)) }
+            .filter { !ignored.contains(it.toRelativeString(outputDirectory)) }
             .forEach { it.delete() }
         if (dumpJson.get()) {
             dumpDirectory.deleteRecursively()
@@ -169,7 +169,7 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
             .sortedBy { it.second.canonicalPath }
             .forEach {
                 val path = it.first.normalPath
-                it.second.copyTo(outputDirectory.resolve("$path.${indexes.compute(path) { _, i -> (i ?: -1) + 1}}.isolated-jar"))
+                it.second.copyTo(outputDirectory.resolve("modules/$path.${indexes.compute(path) { _, i -> (i ?: -1) + 1}}.isolated-jar"))
             }
     }
 

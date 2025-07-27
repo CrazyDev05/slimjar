@@ -19,7 +19,7 @@ tasks {
         doFirst {
             copy {
                 from(project(":loader-agent").tasks.getByName("jar").outputs.files.singleFile)
-                into(layout.buildDirectory.file("resources/main/"))
+                into(layout.buildDirectory.file("resources/main/modules"))
                 include("*.jar")
                 rename("(.*)\\.jar", "loader-agent.isolated-jar")
             }

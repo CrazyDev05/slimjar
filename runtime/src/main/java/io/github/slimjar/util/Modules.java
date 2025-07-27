@@ -45,7 +45,7 @@ public final class Modules {
 
     public static @NotNull URL findModule(@NotNull final String moduleName) {
         final ClassLoader classLoader = Modules.class.getClassLoader();
-        return Objects.requireNonNull(classLoader.getResource(moduleName + ".isolated-jar"));
+        return Objects.requireNonNull(classLoader.getResource("modules/" + moduleName + ".isolated-jar"));
     }
 
     public static @NotNull URL[] extract(
@@ -73,14 +73,14 @@ public final class Modules {
                 fileSystem = FileSystems.newFileSystem(URI.create("jar:" + path.toUri() + "!/"), Map.of());
                 path = fileSystem.getPath("/");
             } else fileSystem = null;
-            resourcesPath = path;
+            resourcesPath = path.resolve("modules");
         } catch (final URISyntaxException | IOException err) {
             // Shouldn't be possible.
             throw new ResolutionException("Failed to resolve local modules", err);
         }
 
         try (final var stream = Files.walk(resourcesPath, 1)) {
-            return stream.map(Path::toString)
+            return stream.map(path -> path.relativize(resourcesPath).toString())
                     .filter(path -> path.endsWith(".isolated-jar"))
                     .map(path -> path.substring(1, path.length() - ".isolated-jar".length()))
                     .filter(name -> !name.equals("loader-agent"))
