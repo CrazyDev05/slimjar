@@ -27,16 +27,18 @@ package io.github.slimjar.app.builder;
 import io.github.slimjar.app.AppendingApplication;
 import io.github.slimjar.app.Application;
 import io.github.slimjar.injector.loader.Injectable;
-import io.github.slimjar.injector.loader.InjectableFactory;
+import io.github.slimjar.injector.loader.factory.InjectableFactory;
 import io.github.slimjar.resolver.data.Repository;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.function.Function;
 
 public abstract class InjectingApplicationBuilder<T extends InjectingApplicationBuilder<T>> extends ApplicationBuilder<T> {
     @NotNull protected final Function<T, Injectable> injectableSupplier;
+    @Nullable protected InjectableFactory injectableFactory;
 
     @Contract(pure = true)
     public InjectingApplicationBuilder(
@@ -72,7 +74,7 @@ public abstract class InjectingApplicationBuilder<T extends InjectingApplication
         @NotNull final String applicationName,
         @NotNull final ClassLoader classLoader
     ) {
-        return new Impl(applicationName, builder -> InjectableFactory.create(
+        return new Impl(applicationName, builder -> builder.getInjectableFactory().create(
             builder.getDownloadDirectoryPath(),
             Collections.singleton(Repository.central()),
             classLoader
@@ -85,6 +87,28 @@ public abstract class InjectingApplicationBuilder<T extends InjectingApplication
             @NotNull final Injectable injectable
     ) {
         return new Impl(applicationName, builder -> injectable);
+    }
+
+    /**
+     * Sets the {@link InjectableFactory} for the builder and returns the builder instance.
+     *
+     * @param injectableFactory the {@link InjectableFactory} to configure for this builder instance.
+     *                          It defines how injectables are created using a provided set of resources.
+     * @return the current builder instance for chaining calls.
+     */
+    @Contract(value = "_ -> this", mutates = "this")
+    public @NotNull T injectableFactory(@NotNull final InjectableFactory injectableFactory) {
+        this.injectableFactory = injectableFactory;
+        return self;
+    }
+
+    @Contract(mutates = "this")
+    protected final @NotNull InjectableFactory getInjectableFactory() {
+        if (injectableFactory == null) {
+            injectableFactory = InjectableFactory.DEFAULT;
+        }
+
+        return injectableFactory;
     }
 
     private static final class Impl extends InjectingApplicationBuilder<Impl> {

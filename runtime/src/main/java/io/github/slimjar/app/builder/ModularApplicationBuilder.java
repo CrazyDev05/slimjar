@@ -30,7 +30,6 @@ import io.github.slimjar.app.module.ModuleExtractor;
 import io.github.slimjar.app.module.RelocatingModuleExtractor;
 import io.github.slimjar.exceptions.SlimJarException;
 import io.github.slimjar.injector.loader.Injectable;
-import io.github.slimjar.injector.loader.InjectableFactory;
 import io.github.slimjar.resolver.data.Repository;
 import io.github.slimjar.resolver.reader.dependency.DependencyDataProviderFactory;
 import io.github.slimjar.resolver.reader.dependency.DependencyReader;
@@ -77,7 +76,7 @@ public abstract class ModularApplicationBuilder<T extends ModularApplicationBuil
             @NotNull final String applicationName,
             @NotNull final ClassLoader classLoader
     ) {
-        return new Impl(applicationName, builder -> InjectableFactory.create(
+        return new Impl(applicationName, builder -> builder.getInjectableFactory().create(
                 builder.getDownloadDirectoryPath(),
                 Collections.singleton(Repository.central()),
                 classLoader

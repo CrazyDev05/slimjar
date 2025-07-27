@@ -22,50 +22,46 @@
  * SOFTWARE.
  */
 
-package io.github.slimjar.injector.loader;
+package io.github.slimjar.injector.loader.factory;
 
 import io.github.slimjar.exceptions.InjectorException;
+import io.github.slimjar.injector.loader.Injectable;
 import io.github.slimjar.resolver.data.Repository;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 
-public final class InjectableFactory {
-    private InjectableFactory() { }
+public final class SelectingInjectableFactory implements InjectableFactory {
 
-    @Contract(value = "_, _ -> new")
-    public static @NotNull Injectable create(
-        @NotNull final Path downloadPath,
-        @NotNull final Collection<Repository> repositories
-    ) throws InjectorException {
-        return create(downloadPath, repositories, InjectableFactory.class.getClassLoader());
+    @NotNull private final InjectableFactory fallback;
+    @NotNull private final List<@NotNull InjectableFactory> factories;
+
+    public SelectingInjectableFactory(
+            @NotNull final InjectableFactory fallback,
+            @NotNull final InjectableFactory @NotNull ... factories) {
+        if (factories.length == 0) throw new IllegalArgumentException("No factories provided");
+        this.fallback = fallback;
+        this.factories = List.of(factories);
     }
 
-    @Contract(value = "_, _, _ -> new")
-    public static @NotNull Injectable create(
+    public @NotNull Injectable create(
         @NotNull final Path downloadPath,
         @NotNull final Collection<Repository> repositories,
-        @NotNull ClassLoader classLoader
+        @NotNull final ClassLoader classLoader
     ) throws InjectorException {
-        while (classLoader != null) {
-            if (classLoader instanceof Injectable injectable) {
-                return injectable;
+
+        ClassLoader current = classLoader;
+        while (current != null) {
+            for (final InjectableFactory factory : factories) {
+                try {
+                    return factory.create(downloadPath, repositories, current);
+                } catch (final InjectorException ignored) {}
             }
-
-            try {
-                if (classLoader instanceof URLClassLoader urlClassLoader)
-                    return new WrappedInjectableClassLoader(urlClassLoader);
-            } catch (Throwable ignored) {}
-
-            try {
-                return UnsafeInjectable.create(classLoader);
-            } catch (Throwable ignored) {}
-            classLoader = classLoader.getParent();
+            current = current.getParent();
         }
 
-        return InstrumentationInjectable.create(downloadPath, repositories);
+        return fallback.create(downloadPath, repositories, classLoader);
     }
 }

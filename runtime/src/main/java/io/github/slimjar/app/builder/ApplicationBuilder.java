@@ -71,7 +71,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -137,7 +136,6 @@ public abstract class ApplicationBuilder<T extends ApplicationBuilder<T>> {
     /**
      * Creates an ApplicationBuilder that allows loading into any given {@link Injectable} instance.
      * For a simple isolated classloader, use {@link io.github.slimjar.injector.loader.IsolatedInjectableClassLoader}
-     * You can create a {@link Injectable} version of any classloader using {@link io.github.slimjar.injector.loader.InjectableFactory#create(Path, Collection)}
      * Alternatively you can provide a custom implementation of {@link Injectable} to specify how the dependencies must be added to the classloader.
      * @param name Name of your application/project. This exists to uniquely identify relocations.
      * @return ApplicationBuilder that allows loading into any given {@link Injectable} instance.
