@@ -24,6 +24,7 @@
 
 package io.github.slimjar.resolver.reader.resolution;
 
+import io.github.slimjar.exceptions.ResolutionException;
 import io.github.slimjar.resolver.ResolutionResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +59,7 @@ public final class WrappingPreResolutionDataProvider implements PreResolutionDat
         try (final var is = resolutionFileURL.openStream()) {
             cachedData = resolutionDataReader.read(is);
             return cachedData;
-        } catch (final IOException | ReflectiveOperationException ignored) {
+        } catch (final IOException | ResolutionException ignored) {
             return Collections.emptyMap();
         }
     }

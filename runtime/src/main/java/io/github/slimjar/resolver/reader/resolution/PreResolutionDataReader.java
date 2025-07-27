@@ -39,7 +39,7 @@ import static io.github.slimjar.util.Serialization.readList;
 
 @FunctionalInterface
 public interface PreResolutionDataReader {
-    @NotNull Map<@NotNull String, @NotNull ResolutionResult> read(@NotNull final InputStream inputStream) throws ReflectiveOperationException;
+    @NotNull Map<@NotNull String, @NotNull ResolutionResult> read(@NotNull final InputStream inputStream) throws ResolutionException;
 
     PreResolutionDataReader DEFAULT = inputStream -> {
         try (final DataInputStream in = new DataInputStream(inputStream)) {

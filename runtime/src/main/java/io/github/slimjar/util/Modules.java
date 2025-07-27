@@ -80,9 +80,9 @@ public final class Modules {
         }
 
         try (final var stream = Files.walk(resourcesPath, 1)) {
-            return stream.map(path -> path.relativize(resourcesPath).toString())
+            return stream.map(path -> resourcesPath.relativize(path).toString())
                     .filter(path -> path.endsWith(".isolated-jar"))
-                    .map(path -> path.substring(1, path.length() - ".isolated-jar".length()))
+                    .map(path -> path.substring(0, path.length() - ".isolated-jar".length()))
                     .filter(name -> !name.equals("loader-agent"))
                     .collect(Collectors.toUnmodifiableSet());
         } catch (final IOException err) {

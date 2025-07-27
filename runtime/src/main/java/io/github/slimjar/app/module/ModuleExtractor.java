@@ -52,7 +52,7 @@ public interface ModuleExtractor {
         final var connection = openJarConnection(url);
 
         try (final var jarFile = connection.getJarFile()) {
-            final var module = jarFile.getJarEntry("%s.isolated-jar".formatted(name));
+            final var module = jarFile.getJarEntry("modules/%s.isolated-jar".formatted(name));
             if (module == null) throw new ModuleNotFoundException(name);
 
             try (final var stream = jarFile.getInputStream(module)) {
