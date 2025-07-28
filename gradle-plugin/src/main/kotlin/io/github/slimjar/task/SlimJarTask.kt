@@ -121,7 +121,8 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
 
     @TaskAction
     internal fun generateData() = with(project) {
-        val ignored = listOfNotNull("slimjar.dat", "slimjar-resolutions.dat".takeIf { tryPreResolve.get() })
+        val ignored = setOfNotNull("", "slimjar.dat", "slimjar-resolutions.dat".takeIf { tryPreResolve.get() })
+        outputDirectory.mkdirs()
         outputDirectory.walkBottomUp()
             .filter { !ignored.contains(it.toRelativeString(outputDirectory)) }
             .forEach { it.delete() }
