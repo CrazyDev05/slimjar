@@ -32,29 +32,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew build
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build with Gradle
-        run: ./gradlew test
+        run: ./gradlew build test
 
   snapshot:
-    needs: test
+    needs: build
     if: github.ref == 'refs/heads/2.x.x' && github.repository == 'CrazyDev05/slimjar' && false
     uses: ./.github/workflows/publish-snapshot.yml
     secrets: inherit
