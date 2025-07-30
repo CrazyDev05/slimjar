@@ -67,8 +67,7 @@ public class XMLResourceTransformer implements ResourceTransformer {
     public void processResource(String resource, InputStream inputStream, Collection<Relocation> rules) throws IOException {
         try {
             Document document = builder.parse(inputStream);
-            if (!processNode(document, rules))
-                return;
+            processNode(document, rules);
 
             File tempFile = File.createTempFile("xml-transformer", ".xml");
             tempFile.deleteOnExit();
@@ -85,8 +84,7 @@ public class XMLResourceTransformer implements ResourceTransformer {
         }
     }
     
-    private boolean processNode(final Node node, final Collection<Relocation> rules) {
-        boolean modified = false;
+    private void processNode(final Node node, final Collection<Relocation> rules) {
         if (node.getNodeType() == Node.TEXT_NODE) {
             final Text textNode = (Text) node;
             final String content = textNode.getNodeValue();
@@ -94,7 +92,6 @@ public class XMLResourceTransformer implements ResourceTransformer {
 
             if (!content.equals(relocatedContent)) {
                 textNode.setNodeValue(relocatedContent);
-                modified = true;
             }
         } else if (node.getNodeType() == Node.ELEMENT_NODE) {
             final NamedNodeMap attributes = node.getAttributes();
@@ -106,7 +103,6 @@ public class XMLResourceTransformer implements ResourceTransformer {
 
                     if (!value.equals(relocatedValue)) {
                         attr.setNodeValue(relocatedValue);
-                        modified = true;
                     }
                 }
             }
@@ -114,9 +110,8 @@ public class XMLResourceTransformer implements ResourceTransformer {
 
         final NodeList children = node.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
-            modified |= processNode(children.item(i), rules);
+            processNode(children.item(i), rules);
         }
-        return modified;
     }
     
     private String relocateIfPossible(final String value, final Collection<Relocation> rules) {
