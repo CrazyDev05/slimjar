@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.asm.core)
-    compileOnly(libs.asm.commons)
+    api(libs.asm.core)
+    api(libs.asm.commons)
 }
 
 license {
