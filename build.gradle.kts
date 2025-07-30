@@ -19,6 +19,8 @@ project(":gradle-plugin") {
 }
 
 subprojects {
+    if (name == "jar-relocator") return@subprojects
+
     apply<JavaLibraryPlugin>()
     apply<YumiLicenserGradlePlugin>()
 

@@ -292,25 +292,8 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
      * Turns a [RenderableDependency] into a [Dependency] with all its
      * transitives.
      */
-    private fun RenderableDependency.toSlimDependency(): Dependency? {
-        return id.toString().toDependency(collectTransitive(children))
-    }
-
-    /** Recursively flattens the transitive dependencies. */
-    private fun collectTransitive(
-        dependencies: Collection<RenderableDependency>,
-        transitive: MutableSet<Dependency> = mutableSetOf(),
-    ): Set<Dependency> {
-        for (dependency in dependencies) {
-            val dep = dependency.id.toString().toDependency(emptyList()) ?: continue
-            if (dep in transitive) continue
-            if (dep.artifactId().endsWith("-bom")) continue
-
-            transitive.add(dep)
-            collectTransitive(dependency.children, transitive)
-        }
-
-        return transitive
+    private fun RenderableDependency.toSlimDependency(added: MutableSet<String>): Dependency? {
+        return id.toString().takeIf(added::add)?.toDependency(children.mapNotNull { it.toSlimDependency(added) })
     }
 
     /**
@@ -335,10 +318,11 @@ open class SlimJarTask @Inject constructor() : DefaultTask() {
         .distinct()
         .map { Repository(it.url.toURL()) }
 
-    private fun ResolvableDependencies.getSlimDependencies(): List<Dependency> =
+    private fun ResolvableDependencies.getSlimDependencies(): List<Dependency> = mutableSetOf<String>().run {
         RenderableModuleResult(resolutionResult.root).children
-            .mapNotNull { it.toSlimDependency() }
+            .mapNotNull { it.toSlimDependency(this) }
             .filterNot { it.artifactId().endsWith("-bom") }
+    }
 
     private fun Collection<Dependency>.flatten(): MutableSet<Dependency> {
         return this.flatMap { it.transitive().flatten() + it }.toMutableSet()
