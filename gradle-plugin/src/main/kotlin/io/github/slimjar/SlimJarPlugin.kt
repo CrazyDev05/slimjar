@@ -71,6 +71,10 @@ class SlimJarPlugin : Plugin<Project> {
             "slimjar",
             asGroovyClosure(BuildConstants.VERSION, ::slimJarLib)
         )
+        dependencies.extra.set(
+            "slimjarHelper",
+            asGroovyClosure("+", BuildConstants.VERSION, ::slimJarHelperLib)
+        )
 
         // Hooks into shadow to inject relocations
         tasks.withType<ShadowJar> {
@@ -108,3 +112,4 @@ class SlimJarPlugin : Plugin<Project> {
 }
 
 internal fun slimJarLib(version: String) = "de.crazydev22.slimjar:runtime:$version"
+internal fun slimJarHelperLib(platform: String, version: String) = "de.crazydev22.slimjar.helper:$platform:$version"

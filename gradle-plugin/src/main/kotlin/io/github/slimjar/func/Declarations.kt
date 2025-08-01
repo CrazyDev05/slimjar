@@ -25,6 +25,7 @@
 package io.github.slimjar.func
 
 import io.github.slimjar.BuildConstants
+import io.github.slimjar.slimJarHelperLib
 import io.github.slimjar.slimJarLib
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -42,3 +43,4 @@ val Project.slimInjectToIsolated: Boolean
     get() = findProperty("slimjar.default.isolated.inject")?.toString()?.toBoolean() ?: true
 
 fun DependencyHandler.slimjar(version: String = BuildConstants.VERSION) = slimJarLib(version)
+fun DependencyHandler.slimjarHelper(platform: String, version: String = BuildConstants.VERSION) = slimJarHelperLib(platform, version)

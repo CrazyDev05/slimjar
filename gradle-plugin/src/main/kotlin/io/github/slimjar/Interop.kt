@@ -35,3 +35,15 @@ inline fun <T : Any, I> Any.asGroovyClosure(
     override fun invoke(p1: I): T = doCall(p1)
     override fun invoke(): T = invoke(default)
 }
+
+inline fun <T : Any, I1, I2> Any.asGroovyClosure(
+    default1: I1,
+    default2: I2,
+    crossinline func: (arg1: I1, arg2: I2) -> T
+): Closure<T> = object : Closure<T>(this), (I1, I2) -> T, () -> T {
+    fun doCall(arg1: I1, arg2: I2) = func(arg1, arg2)
+    fun doCall(arg1: I1) = func(arg1, default2)
+    fun doCall() = doCall(default1, default2)
+    override fun invoke(p1: I1, p2: I2): T = doCall(p1, p2)
+    override fun invoke(): T = invoke(default1, default2)
+}

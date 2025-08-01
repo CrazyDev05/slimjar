@@ -1,6 +1,6 @@
 rootProject.name = "slimjar"
 
-include("runtime", "gradle-plugin", "loader-agent", "jar-relocator")
+include("runtime", ":helper:spigot", "gradle-plugin", "loader-agent", "jar-relocator")
 
 pluginManagement.repositories {
     mavenCentral()

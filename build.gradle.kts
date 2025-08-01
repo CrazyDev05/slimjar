@@ -10,12 +10,12 @@ plugins {
     java
 }
 
-project(":runtime") {
-    apply<MavenPublishPlugin>()
-}
-
-project(":gradle-plugin") {
-    apply<MavenPublishPlugin>()
+listOf(
+    ":runtime",
+    ":gradle-plugin",
+    ":helper:spigot",
+).forEach {
+    project(it).apply<MavenPublishPlugin>()
 }
 
 subprojects {

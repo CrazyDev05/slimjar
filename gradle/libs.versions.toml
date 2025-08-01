@@ -9,6 +9,8 @@ asm = "9.8"
 jupiter = "5.12.2"
 mockito = "5.17.0"
 
+spigot = "1.21.8-R0.1-SNAPSHOT"
+
 [libraries]
 jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
@@ -21,6 +23,8 @@ asm-core = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 annotations = "org.jetbrains:annotations:24.0.0"
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+
+spigot = { module = "org.spigotmc:spigot-api", version.ref = "spigot" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
