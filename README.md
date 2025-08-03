@@ -10,7 +10,7 @@
     <a href="https://plugins.gradle.org/plugin/de.crazydev22.slimjar">
         <img src="https://img.shields.io/maven-metadata/v.svg?label=gradle-plugin&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fde%2Fcrazydev22%2Fslimjar%2Fde.crazydev22.slimjar.gradle.plugin%2Fmaven-metadata.xml">
     </a>
-    <a href=https://central.sonatype.com/artifact/de.crazydev22.slimjar/runtime/versions">
+    <a href=https://central.sonatype.com/artifact/de.crazydev22.slimjar/runtime/versions>
         <img src="https://img.shields.io/maven-metadata/v.svg?label=maven&metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fde%2Fcrazydev22%2Fslimjar%2Fruntime%2Fmaven-metadata.xml">
     </a>
   </div>
