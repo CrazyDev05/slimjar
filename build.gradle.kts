@@ -12,8 +12,7 @@ plugins {
 
 listOf(
     ":runtime",
-    ":gradle-plugin",
-    ":helper:spigot",
+    ":gradle-plugin"
 ).forEach {
     project(it).apply<MavenPublishPlugin>()
 }

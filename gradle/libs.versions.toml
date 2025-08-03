@@ -9,7 +9,9 @@ asm = "9.8"
 jupiter = "5.12.2"
 mockito = "5.17.0"
 
+# Helpers
 spigot = "1.21.8-R0.1-SNAPSHOT"
+velocity = "3.4.0-SNAPSHOT"
 
 [libraries]
 jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter" }
@@ -25,6 +27,7 @@ annotations = "org.jetbrains:annotations:24.0.0"
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 spigot = { module = "org.spigotmc:spigot-api", version.ref = "spigot" }
+velocity = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
