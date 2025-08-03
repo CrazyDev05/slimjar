@@ -17,6 +17,18 @@ listOf(
     project(it).apply<MavenPublishPlugin>()
 }
 
+project(":helper").subprojects {
+    group = "${rootProject.group}.helper"
+
+    apply<JavaLibraryPlugin>()
+    apply<MavenPublishPlugin>()
+
+    dependencies {
+        compileOnly(rootProject.libs.annotations)
+        add("api", project(":runtime"))
+    }
+}
+
 subprojects {
     if (name == "jar-relocator") return@subprojects
 
