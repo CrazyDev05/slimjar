@@ -140,15 +140,9 @@ public final class SpigotApplicationBuilder extends ApplicationBuilder<SpigotApp
             BiFunction<URL[], ClassLoader, URLClassLoader> factory = null;
 
             if (remap) {
-                try {
-                    final Class<?> libraryLoaderClass = Class.forName("org.bukkit.plugin.java.LibraryLoader");
-                    final Field remapperField = libraryLoaderClass.getDeclaredField("REMAPPER");
-                    final Field factoryField = libraryLoaderClass.getDeclaredField("LIBRARY_LOADER_FACTORY");
-                    remapperField.setAccessible(true);
-                    factoryField.setAccessible(true);
-                    remapper = (Function<List<Path>, List<Path>>) remapperField.get(libraryLoader);
-                    factory = (BiFunction<URL[], ClassLoader, URLClassLoader>) factoryField.get(libraryLoader);
-                } catch (final Throwable ignored) {}
+                var values = findRemapper(false);
+                remapper = values.remapper();
+                factory = values.factory();
             }
 
             if (remapper == null) remapper = Function.identity();
@@ -188,5 +182,29 @@ public final class SpigotApplicationBuilder extends ApplicationBuilder<SpigotApp
             throw new InjectorException("Failed to build application", err);
         }
         return new AppendingApplication();
+    }
+
+    static Values findRemapper(boolean addDefaults) {
+        Function<List<Path>, List<Path>> remapper = null;
+        BiFunction<URL[], ClassLoader, URLClassLoader> factory = null;
+        try {
+            final Class<?> libraryLoaderClass = Class.forName("org.bukkit.plugin.java.LibraryLoader");
+            final Field remapperField = libraryLoaderClass.getDeclaredField("REMAPPER");
+            final Field factoryField = libraryLoaderClass.getDeclaredField("LIBRARY_LOADER_FACTORY");
+            remapperField.setAccessible(true);
+            factoryField.setAccessible(true);
+            remapper = (Function<List<Path>, List<Path>>) remapperField.get(null);
+            factory = (BiFunction<URL[], ClassLoader, URLClassLoader>) factoryField.get(null);
+        } catch (final Throwable ignored) {}
+
+        if (addDefaults) {
+            if (remapper == null) remapper = Function.identity();
+            if (factory == null) factory = (urls, parent) -> new IsolatedInjectableClassLoader(urls, Collections.emptyList(), parent);
+        }
+
+        return new Values(remapper, factory);
+    }
+
+    record Values(Function<List<Path>, List<Path>> remapper, BiFunction<URL[], ClassLoader, URLClassLoader> factory) {
     }
 }

@@ -28,6 +28,7 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 spigot = { module = "org.spigotmc:spigot-api", version.ref = "spigot" }
 velocity = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+paper = { module = "io.papermc.paper:paper-api", version.ref = "spigot" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
