@@ -137,18 +137,18 @@ public class PaperApplicationBuilder extends InjectingApplicationBuilder<PaperAp
         @Override
         public void info(@NotNull String message, @Nullable Object... args) {
             if (!debug) return;
-            logger.info(message, args);
+            logger.info(message.formatted(args));
         }
 
         @Override
         public void debug(@NotNull String message, @Nullable Object... args) {
             if (!debug) return;
-            logger.info(message, args);
+            logger.info(message.formatted(args));
         }
 
         @Override
         public void error(@NotNull String message, @Nullable Object... args) {
-            logger.error(message, args);
+            logger.error(message.formatted(args));
         }
     }
 }
