@@ -99,11 +99,20 @@ public final class CachingDependencyResolver implements DependencyResolver {
         for (final var enquirer : usedRepositories) {
             futures.add(ForkJoinTask.adapt(() -> enquirer.enquire(dependency)).fork());
         }
+        ResolutionResult fallbackResult = null;
         for (final var future : futures) {
             final ResolutionResult result = future.join();
             if (result == null) continue;
+            if (result.aggregator()) {
+                if (fallbackResult == null) fallbackResult = result;
+                continue;
+            }
             LOGGER.debug("Resolved %s @ %s", dependency, result.dependencyURL());
             return result;
+        }
+        if (fallbackResult != null) {
+            LOGGER.debug("Resolved %s @ %s", dependency, fallbackResult.dependencyURL());
+            return fallbackResult;
         }
         LOGGER.debug("Resolved %s @ [FAILED TO RESOLVE]", dependency);
         return null;
